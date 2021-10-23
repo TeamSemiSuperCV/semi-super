@@ -29,7 +29,7 @@ import objective as obj_lib
 import tensorflow.compat.v2 as tf
 import tensorflow_datasets as tfds
 
-
+import datasets
 
 FLAGS = flags.FLAGS
 
