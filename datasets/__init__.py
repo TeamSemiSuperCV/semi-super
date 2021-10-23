@@ -1,3 +1,3 @@
 """import all datasets"""
 
-import retina_dataset
+from datasets import retina_dataset

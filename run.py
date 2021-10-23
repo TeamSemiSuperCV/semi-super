@@ -90,7 +90,7 @@ flags.DEFINE_string(
     'Split for evaluation.')
 
 flags.DEFINE_string(
-    'dataset', 'imagenet2012',
+    'dataset', 'RetinaDataset',
     'Name of a dataset.')
 
 flags.DEFINE_bool(
