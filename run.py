@@ -29,7 +29,7 @@ import objective as obj_lib
 import tensorflow.compat.v2 as tf
 import tensorflow_datasets as tfds
 
-
+import datasets
 
 FLAGS = flags.FLAGS
 
@@ -90,7 +90,7 @@ flags.DEFINE_string(
     'Split for evaluation.')
 
 flags.DEFINE_string(
-    'dataset', 'imagenet2012',
+    'dataset', 'RetinaDataset',
     'Name of a dataset.')
 
 flags.DEFINE_bool(
