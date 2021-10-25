@@ -237,6 +237,10 @@ flags.DEFINE_boolean(
     'use_blur', True,
     'Whether or not to use Gaussian blur for augmentation during pretraining.')
 
+flags.DEFINE_boolean(
+    'test_crop', False,
+    'Whether or not to crop image during testing.') 
+
 
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
