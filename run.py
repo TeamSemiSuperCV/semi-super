@@ -241,6 +241,9 @@ flags.DEFINE_boolean(
     'test_crop', False,
     'Whether or not to crop image during testing.') 
 
+flags.DEFINE_boolean(
+    'eval_per_loop', True,
+    'Eval every loop.') 
 
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
@@ -308,6 +311,25 @@ def save(model, global_step):
     for step_to_delete in exported_steps[:-FLAGS.keep_hub_module_max]:
       tf.io.gfile.rmtree(os.path.join(export_dir, str(step_to_delete)))
 
+def save_best(model, global_step):
+  """Export as SavedModel for finetuning and inference."""
+  saved_model = build_saved_model(model)
+  export_dir = os.path.join(FLAGS.model_dir, 'saved_model_best')
+  checkpoint_export_dir = os.path.join(export_dir, str(global_step))
+  if tf.io.gfile.exists(checkpoint_export_dir):
+    tf.io.gfile.rmtree(checkpoint_export_dir)
+  tf.saved_model.save(saved_model, checkpoint_export_dir)
+
+  if FLAGS.keep_hub_module_max > 0:
+    # Delete old exported SavedModels.
+    exported_steps = []
+    for subdir in tf.io.gfile.listdir(export_dir):
+      if not subdir.isdigit():
+        continue
+      exported_steps.append(int(subdir))
+    exported_steps.sort()
+    for step_to_delete in exported_steps[:-FLAGS.keep_hub_module_max]:
+      tf.io.gfile.rmtree(os.path.join(export_dir, str(step_to_delete)))
 
 def try_restore_from_checkpoint(model, global_step, optimizer):
   """Restores the latest ckpt if it exists, otherwise check FLAGS.checkpoint."""
@@ -432,6 +454,20 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
 
   # Export as SavedModel for finetuning and inference.
   save(model, global_step=result['global_step'])
+
+  result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best.json')
+  if tf.io.gfile.exists(result_best_json_path):
+    with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
+      result_best = json.load(f)
+
+    if result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]:
+      save_best(model, global_step=result['global_step'])
+      with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+        json.dump({k: float(v) for k, v in result.items()}, f)
+
+  else:
+    with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+      json.dump({k: float(v) for k, v in result.items()}, f)
 
   return result
 
@@ -653,6 +689,12 @@ def main(argv):
           checkpoint_manager.save(cur_step)
           logging.info('Completed: %d / %d steps', cur_step, train_steps)
           metrics.log_and_write_metrics_to_summary(all_metrics, cur_step)
+
+          if FLAGS.eval_per_loop == True:
+            perform_evaluation(model, builder, eval_steps,
+            checkpoint_manager.latest_checkpoint, strategy,
+            topology)
+
           tf.summary.scalar(
               'learning_rate',
               learning_rate(tf.cast(global_step, dtype=tf.float32)),
@@ -662,7 +704,7 @@ def main(argv):
           metric.reset_states()
       logging.info('Training complete...')
 
-    if FLAGS.mode == 'train_then_eval':
+    if FLAGS.mode == 'train_then_eval' and FLAGS.eval_per_loop == False:
       perform_evaluation(model, builder, eval_steps,
                          checkpoint_manager.latest_checkpoint, strategy,
                          topology)

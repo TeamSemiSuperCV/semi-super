@@ -491,6 +491,9 @@ def preprocess_for_eval(image, height, width, crop=True):
   """
   if crop:
     image = center_crop(image, height, width, crop_proportion=CROP_PROPORTION)
+  else:
+    image = tf.image.resize([image], [height, width],
+                          method=tf.image.ResizeMethod.BICUBIC)[0]
   image = tf.reshape(image, [height, width, 3])
   image = tf.clip_by_value(image, 0., 1.)
   return image
