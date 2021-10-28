@@ -16,9 +16,13 @@
 """Training utilities."""
 
 from absl import logging
+from absl import flags
 
 import tensorflow.compat.v2 as tf
+import json
+import os
 
+FLAGS = flags.FLAGS
 
 def update_pretrain_metrics_train(contrast_loss, contrast_acc, contrast_entropy,
                                   loss, logits_con, labels_con):
@@ -68,6 +72,26 @@ def _float_metric_value(metric):
 
 
 def log_and_write_metrics_to_summary(all_metrics, global_step):
+  for metric in all_metrics:
+    metric_value = _float_metric_value(metric)
+    logging.info('Step: [%d] %s = %f', global_step, metric.name, metric_value)
+    tf.summary.scalar(metric.name, metric_value, step=global_step)
+
+
+def log_and_write_metrics_to_summary_json(all_metrics, global_step):
+  """Writes training metrics to json and log."""
+  metric_json_path = os.path.join(FLAGS.model_dir, 'metric.json')
+  all_metrics_dict = {metric.name: metric.result().numpy() for metric in all_metrics}
+  all_metrics_dict['global_step'] = global_step
+
+  with tf.io.gfile.GFile(metric_json_path, 'w') as f:
+    json.dump({k: float(v) for k, v in all_metrics_dict.items()}, f)
+
+  metric_json_path = os.path.join(
+      FLAGS.model_dir, 'metric_%d.json'%all_metrics_dict['global_step'])
+  with tf.io.gfile.GFile(metric_json_path, 'w') as f:
+    json.dump({k: float(v) for k, v in all_metrics_dict.items()}, f)
+
   for metric in all_metrics:
     metric_value = _float_metric_value(metric)
     logging.info('Step: [%d] %s = %f', global_step, metric.name, metric_value)
