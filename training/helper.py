@@ -6,6 +6,12 @@ class jsonPlot():
  """
  PLOTTING FROM JSON FILES
  todo: ADD METRICS PLOT (RIGHT NOW ONLY DOING EVAL)
+ 
+ example usage:
+ model_dir="/content/drive/MyDrive/FourthBrain/TeamSemiSuperCV/pretraining/"
+ model_folder= "xray_orig_2x_skTrue_lr07_wd3_temp25"
+ jtest = jsonPlot(model_dir+model_folder)
+ jtest.plot_accuracy()
  """
   def __init__(self, folderpath):
     self.folder = folderpath
