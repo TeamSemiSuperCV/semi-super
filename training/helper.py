@@ -48,6 +48,15 @@ class jsonPlot():
     plt.plot(best[-1],best[0] ,'ro')
     plt.xlabel('Iteration step')
     plt.ylabel('Eval Accuracy (top 1)')
+    
+  def plot_loss(self):
+    best, acc, loss, step = self.get_result()
+
+    plt.figure(figsize=(10,10))
+    plt.plot(step, loss)
+    plt.plot(best[-1],best[1] ,'ro')
+    plt.xlabel('Iteration step')
+    plt.ylabel('Eval Loss')
 
  
  
