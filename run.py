@@ -204,7 +204,7 @@ flags.DEFINE_integer(
     'Number of non-linear head layers.')
 
 flags.DEFINE_integer(
-    'ft_proj_selector', 0,
+    'ft_proj_selector', 1,
     'Which layer of the projection head to use during fine-tuning. '
     '0 means no projection head, and -1 means the final layer.')
 
@@ -247,6 +247,10 @@ flags.DEFINE_boolean(
 flags.DEFINE_boolean(
     'eval_per_loop', True,
     'Eval every loop.') 
+
+flags.DEFINE_boolean(
+    'save_best_loss', True,
+    'Save best loss model on eval split.') 
 
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
@@ -314,10 +318,10 @@ def save(model, global_step):
     for step_to_delete in exported_steps[:-FLAGS.keep_hub_module_max]:
       tf.io.gfile.rmtree(os.path.join(export_dir, str(step_to_delete)))
 
-def save_best(model, global_step):
+def save_best(model, global_step, model_best_metric):
   """Export best model as SavedModel for finetuning and inference."""
   saved_model = build_saved_model(model)
-  export_dir = os.path.join(FLAGS.model_dir, 'saved_model_best')
+  export_dir = os.path.join(FLAGS.model_dir, 'saved_model_{}'.format(model_best_metric))
   checkpoint_export_dir = os.path.join(export_dir, str(global_step))
   if tf.io.gfile.exists(checkpoint_export_dir):
     tf.io.gfile.rmtree(checkpoint_export_dir)
@@ -388,12 +392,13 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
   # Build metrics.
   with strategy.scope():
     regularization_loss = tf.keras.metrics.Mean('eval/regularization_loss')
+    eval_sup_loss_metric = tf.keras.metrics.Mean('eval/supervised_loss')
     label_top_1_accuracy = tf.keras.metrics.Accuracy(
         'eval/label_top_1_accuracy')
     label_top_5_accuracy = tf.keras.metrics.TopKCategoricalAccuracy(
         5, 'eval/label_top_5_accuracy')
     all_metrics = [
-        regularization_loss, label_top_1_accuracy, label_top_5_accuracy
+        regularization_loss, eval_sup_loss_metric, label_top_1_accuracy, label_top_5_accuracy
     ]
 
     # Restore checkpoint.
@@ -413,6 +418,9 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
                                          label_top_5_accuracy, outputs, l)
     reg_loss = model_lib.add_weight_decay(model, adjust_per_optimizer=True)
     regularization_loss.update_state(reg_loss)
+    eval_sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
+    eval_sup_loss_metric.update_state(eval_sup_loss)
+
 
   with strategy.scope():
 
@@ -460,21 +468,42 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
   # save(model, global_step=result['global_step'])
 
   # Export best model as SavedModel for finetuning and inference.
-  result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best.json')
+  result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_acc.json')
   if tf.io.gfile.exists(result_best_json_path):
     with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
       result_best = json.load(f)
 
-    if result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]:
-      save_best(model, global_step=result['global_step'])
+    is_best_acc = result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]
+    
+    if is_best_acc:
+      save_best(model, global_step=result['global_step'], model_best_metric='acc')
       with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
         json.dump({k: float(v) for k, v in result.items()}, f)
 
   else:
-    save_best(model, global_step=result['global_step'])
+    save_best(model, global_step=result['global_step'], model_best_metric='acc')
     with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
       json.dump({k: float(v) for k, v in result.items()}, f)
 
+  # Export best loss model
+  if FLAGS.save_best_loss:
+    result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_loss.json')
+    if tf.io.gfile.exists(result_best_json_path):
+      with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
+        result_best = json.load(f)
+
+      is_best_loss = result["eval/supervised_loss"] < result_best["eval/supervised_loss"]
+      
+      if is_best_loss:
+        save_best(model, global_step=result['global_step'], model_best_metric='loss')
+        with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+          json.dump({k: float(v) for k, v in result.items()}, f)
+
+    else:
+      save_best(model, global_step=result['global_step'], model_best_metric='loss')
+      with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+        json.dump({k: float(v) for k, v in result.items()}, f)
+  
   return result
 
 

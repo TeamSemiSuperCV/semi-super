@@ -34,7 +34,7 @@ def print_accuracy_history(training_history, flags):
   return
 
 def print_loss_history(training_history, flags, logscale=False):
-  cont_loss = training_history['train/contrast_loss']
+  val_sup_loss = training_history['eval/supervised_loss']
   train_sup_loss = training_history['train/supervised_loss']
   nrows = training_history.shape[0]
   if flags['checkpoint_epochs'] == 1 and flags['checkpoint_steps'] == 0:
@@ -44,8 +44,9 @@ def print_loss_history(training_history, flags, logscale=False):
     xvalues = training_history['global_step']
     plt.xlabel('Steps')
 
-  plt.plot(xvalues, train_sup_loss, color='darkorange', label='Supervised loss (train)')
-  plt.title('Training loss')
+  plt.plot(xvalues, train_sup_loss, color='darkorange', label='Train')
+  plt.plot(xvalues, val_sup_loss, color='steelblue', label='Valid')
+  plt.title('Supervised Loss')
   plt.ylabel('Loss')
   plt.legend()
   if logscale:
@@ -55,7 +56,7 @@ def print_loss_history(training_history, flags, logscale=False):
   return
 
 def gen_plots():
-  """Export best model as SavedModel for finetuning and inference."""
+  """Generate train plots."""
   def create_df(fnames):
     results = []
 
@@ -68,16 +69,12 @@ def gen_plots():
     return df
   
   result_paths = glob.glob(os.path.join(FLAGS.model_dir, 'result_[0-9]*.json'))
-  
   eval_df = create_df(result_paths)
-
   metric_paths = glob.glob(os.path.join(FLAGS.model_dir, 'metric_[0-9]*.json'))
   train_df = create_df(metric_paths)
-
   results_df = train_df.merge(eval_df, how='left', on='global_step')
 
   flags_path = os.path.join(FLAGS.model_dir, 'flags.json')
-
   with tf.io.gfile.GFile(flags_path, 'r') as f:
     flags_dict = json.load(f)
 
