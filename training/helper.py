@@ -1,4 +1,56 @@
+import glob, json
+import numpy as np
+import matplotlib.pyplot as plt
 
+class jsonPlot():
+ """
+ PLOTTING FROM JSON FILES
+ todo: ADD METRICS PLOT (RIGHT NOW ONLY DOING EVAL)
+ """
+  def __init__(self, folderpath):
+    self.folder = folderpath
+
+  def read_json(self,filepath):
+    with open(filepath) as json_file:
+      data = json.load(json_file)
+    acc = data['eval/label_top_1_accuracy']
+    loss = data['eval/regularization_loss']
+    step = data['global_step']
+    json_file.close()
+    return (acc,loss,step)
+  
+  def get_result(self):
+    acc = []
+    loss = []
+    step = []
+    best = []
+    for filepath in glob.glob(self.folder+'/result_*.json'):
+        iacc,iloss,istep = self.read_json(filepath)
+        if 'best' in filepath:
+          best = [iacc, iloss, istep]
+        else:  
+          acc.append(iacc)
+          loss.append(iloss)
+          step.append(istep)
+    # sort by step
+    acc = np.array(acc)
+    loss = np.array(loss)
+    step = np.array(step)
+    sortidx = step.argsort()
+    return (best, acc[sortidx], loss[sortidx], step[sortidx])
+
+    
+  def plot_accuracy(self):
+    best, acc, loss, step = self.get_result()
+
+    plt.figure(figsize=(10,10))
+    plt.plot(step, acc)
+    plt.plot(best[-1],best[0] ,'ro')
+    plt.xlabel('Iteration step')
+    plt.ylabel('Eval Accuracy (top 1)')
+
+ 
+ 
  class simclrCommand():
     '''
     simclrCommand(model_dir, model_folder, params={})
