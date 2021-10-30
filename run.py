@@ -80,7 +80,7 @@ flags.DEFINE_integer(
     'Batch size for eval.')
 
 flags.DEFINE_integer(
-    'checkpoint_epochs', 1,
+    'checkpoint_epochs', 3,
     'Number of epochs between checkpoints/summaries.')
 
 flags.DEFINE_integer(
@@ -730,7 +730,7 @@ def main(argv):
             checkpoint_manager.latest_checkpoint, strategy,
             topology)
 
-            plots_lib.gen_plots()
+            # plots_lib.gen_plots()
 
           tf.summary.scalar(
               'learning_rate',
@@ -740,6 +740,8 @@ def main(argv):
         for metric in all_metrics:
           metric.reset_states()
       logging.info('Training complete...')
+
+    plots_lib.gen_plots()
 
     if FLAGS.mode == 'train_then_eval' and FLAGS.eval_per_loop == False:
       perform_evaluation(model, builder, eval_steps,
