@@ -741,7 +741,7 @@ def main(argv):
           metric.reset_states()
       logging.info('Training complete...')
 
-    plots_lib.gen_plots()
+    # plots_lib.gen_plots()
 
     if FLAGS.mode == 'train_then_eval' and FLAGS.eval_per_loop == False:
       perform_evaluation(model, builder, eval_steps,
