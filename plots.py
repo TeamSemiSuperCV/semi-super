@@ -94,6 +94,7 @@ def gen_plots():
   
   metric_paths = tf.io.gfile.glob(os.path.join(FLAGS.model_dir, 'metric_[0-9]*.json'))
   train_df = create_df(metric_paths)
+  train_df.sort_values(by=['global_step'], inplace=True)
 
   flags_path = os.path.join(FLAGS.model_dir, 'flags.json')
   with tf.io.gfile.GFile(flags_path, 'r') as f:
