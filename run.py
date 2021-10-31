@@ -252,6 +252,10 @@ flags.DEFINE_boolean(
     'save_best_loss', True,
     'Save best loss model on eval split.') 
 
+flags.DEFINE_string(
+    'tmp_folder', '/root/simclrv2_tmp',
+    'Name of a dataset.') 
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
