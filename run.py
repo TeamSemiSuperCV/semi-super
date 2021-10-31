@@ -80,7 +80,7 @@ flags.DEFINE_integer(
     'Batch size for eval.')
 
 flags.DEFINE_integer(
-    'checkpoint_epochs', 3,
+    'checkpoint_epochs', 5,
     'Number of epochs between checkpoints/summaries.')
 
 flags.DEFINE_integer(
@@ -93,7 +93,7 @@ flags.DEFINE_string(
     'Split for evaluation.')
 
 flags.DEFINE_string(
-    'dataset', 'RetinaDataset',
+    'dataset', 'xray_orig',
     'Name of a dataset.')
 
 flags.DEFINE_bool(
@@ -245,16 +245,24 @@ flags.DEFINE_boolean(
     'Whether or not to crop image during testing.') 
 
 flags.DEFINE_boolean(
-    'eval_per_loop', True,
+    'eval_per_loop', False,
     'Eval every loop.') 
 
 flags.DEFINE_boolean(
-    'save_best_loss', True,
+    'save_best_loss', False,
     'Save best loss model on eval split.') 
+
+flags.DEFINE_boolean(
+    'save_best_acc', False,
+    'Save best acc model on eval split.')
 
 flags.DEFINE_string(
     'tmp_folder', '/tmp',
-    'Name of a dataset.') 
+    'Name of a dataset.')
+
+flags.DEFINE_float(
+    'area_range_min', 0.08,
+    'The strength of color jittering.') 
 
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
@@ -469,25 +477,26 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
     json.dump(serializable_flags, f)
 
   # Export as SavedModel for finetuning and inference.
-  # save(model, global_step=result['global_step'])
+  save(model, global_step=result['global_step'])
 
-  # Export best model as SavedModel for finetuning and inference.
-  result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_acc.json')
-  if tf.io.gfile.exists(result_best_json_path):
-    with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
-      result_best = json.load(f)
+  # Export best acc model
+  if FLAGS.save_best_acc:
+    result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_acc.json')
+    if tf.io.gfile.exists(result_best_json_path):
+      with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
+        result_best = json.load(f)
 
-    is_best_acc = result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]
-    
-    if is_best_acc:
+      is_best_acc = result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]
+      
+      if is_best_acc:
+        save_best(model, global_step=result['global_step'], model_best_metric='acc')
+        with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+          json.dump({k: float(v) for k, v in result.items()}, f)
+
+    else:
       save_best(model, global_step=result['global_step'], model_best_metric='acc')
       with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
         json.dump({k: float(v) for k, v in result.items()}, f)
-
-  else:
-    save_best(model, global_step=result['global_step'], model_best_metric='acc')
-    with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
-      json.dump({k: float(v) for k, v in result.items()}, f)
 
   # Export best loss model
   if FLAGS.save_best_loss:

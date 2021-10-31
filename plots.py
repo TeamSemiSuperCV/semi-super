@@ -27,7 +27,6 @@ def print_contrastive_history(training_history, flags):
   plt.ylabel('Accuracy')
   plt.legend()
 
-  # plt.savefig(os.path.join(FLAGS.model_dir, 'Accuracy.jpeg'))
   save_path = os.path.join(FLAGS.tmp_folder, 'Accuracy.jpeg')
   plt.savefig(save_path)
   plt.close()
@@ -93,16 +92,11 @@ def gen_plots():
     df = pd.DataFrame(results)
     return df
   
-  # result_paths = glob.glob(os.path.join(FLAGS.model_dir, 'result_[0-9]*.json'))
-  # eval_df = create_df(result_paths)
   metric_paths = tf.io.gfile.glob(os.path.join(FLAGS.model_dir, 'metric_[0-9]*.json'))
   train_df = create_df(metric_paths)
-  # results_df = train_df.merge(eval_df, how='left', on='global_step')
 
   flags_path = os.path.join(FLAGS.model_dir, 'flags.json')
   with tf.io.gfile.GFile(flags_path, 'r') as f:
     flags_dict = json.load(f)
 
   print_contrastive_history(train_df, flags_dict)
-  # print_accuracy_history(results_df, flags_dict)
-  # print_loss_history(results_df, flags_dict)
