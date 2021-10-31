@@ -253,7 +253,7 @@ flags.DEFINE_boolean(
     'Save best loss model on eval split.') 
 
 flags.DEFINE_string(
-    'tmp_folder', '/root/simclrv2_tmp',
+    'tmp_folder', '/tmp',
     'Name of a dataset.') 
 
 def get_salient_tensors_dict(include_projection_head):
