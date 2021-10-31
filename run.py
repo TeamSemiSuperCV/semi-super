@@ -745,13 +745,12 @@ def main(argv):
           metric.reset_states()
       logging.info('Training complete...')
 
-    plots_lib.gen_plots()
-
     if FLAGS.mode == 'train_then_eval' and FLAGS.eval_per_loop == False:
       perform_evaluation(model, builder, eval_steps,
                          checkpoint_manager.latest_checkpoint, strategy,
                          topology)
 
+    plots_lib.gen_plots()
 
 if __name__ == '__main__':
   tf.compat.v1.enable_v2_behavior()
