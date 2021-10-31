@@ -316,7 +316,7 @@ def crop_and_resize(image, height, width):
       bbox,
       min_object_covered=0.1,
       aspect_ratio_range=(3. / 4 * aspect_ratio, 4. / 3. * aspect_ratio),
-      area_range=(0.08, 1.0),
+      area_range=(FLAGS.area_range_min, 1.0),
       max_attempts=100,
       scope=None)
   return tf.image.resize([image], [height, width],
