@@ -262,7 +262,7 @@ flags.DEFINE_string(
 
 flags.DEFINE_float(
     'area_range_min', 0.08,
-    'The strength of color jittering.') 
+    'The area range min value of crop.') 
 
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
