@@ -33,7 +33,7 @@ def print_contrastive_history(training_history, flags):
 
   if tf.io.gfile.exists(save_path):
     dest_path = os.path.join(FLAGS.model_dir, 'Accuracy.jpeg')
-    tf.io.gfile.copy(save_path, dest_path)
+    tf.io.gfile.copy(save_path, dest_path, overwrite=True)
 
   return
 
