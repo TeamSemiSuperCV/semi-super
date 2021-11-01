@@ -264,6 +264,10 @@ flags.DEFINE_float(
     'area_range_min', 0.08,
     'The area range min value of crop.') 
 
+flags.DEFINE_boolean(
+    'save_only_last_ckpt', True,
+    'Save only last checkpoint. Intermediate ckpts are not saved.')
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
@@ -734,16 +738,20 @@ def main(argv):
         with summary_writer.as_default():
           train_multiple_steps(iterator)
           cur_step = global_step.numpy()
-          checkpoint_manager.save(cur_step)
+
+          if FLAGS.save_only_last_ckpt == False or cur_step == train_steps:
+            checkpoint_manager.save(cur_step)
+          
           logging.info('Completed: %d / %d steps', cur_step, train_steps)
+
           metrics.log_and_write_metrics_to_summary_json(all_metrics, cur_step)
 
-          if FLAGS.eval_per_loop == True:
+          if FLAGS.eval_per_loop == True and FLAGS.save_only_last_ckpt == False:
             perform_evaluation(model, builder, eval_steps,
             checkpoint_manager.latest_checkpoint, strategy,
             topology)
-
-            # plots_lib.gen_plots()
+          elif FLAGS.eval_per_loop == True:
+            logging.warning('Skipping eval per loop because save_only_last_ckpt is set to True')
 
           tf.summary.scalar(
               'learning_rate',
