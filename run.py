@@ -395,7 +395,7 @@ def json_serializable(val):
     return False
 
 
-def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
+def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, training_complete):
   """Perform evaluation."""
   if FLAGS.train_mode == 'pretrain' and not FLAGS.lineareval_while_pretraining:
     logging.info('Skipping eval during pretraining without linear eval.')
@@ -481,7 +481,8 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology):
     json.dump(serializable_flags, f)
 
   # Export as SavedModel for finetuning and inference.
-  save(model, global_step=result['global_step'])
+  if training_complete:
+    save(model, global_step=result['global_step'])
 
   # Export best acc model
   if FLAGS.save_best_acc:
@@ -739,7 +740,8 @@ def main(argv):
           train_multiple_steps(iterator)
           cur_step = global_step.numpy()
 
-          if FLAGS.save_only_last_ckpt == False or cur_step >= train_steps:
+          training_complete = cur_step >= train_steps
+          if FLAGS.save_only_last_ckpt == False or training_complete:
             checkpoint_manager.save(cur_step)
           
           logging.info('Completed: %d / %d steps', cur_step, train_steps)
@@ -749,7 +751,7 @@ def main(argv):
           if FLAGS.eval_per_loop == True and FLAGS.save_only_last_ckpt == False:
             perform_evaluation(model, builder, eval_steps,
             checkpoint_manager.latest_checkpoint, strategy,
-            topology)
+            topology, training_complete)
           elif FLAGS.eval_per_loop == True:
             logging.warning('Skipping eval per loop because save_only_last_ckpt is set to True')
 
@@ -765,7 +767,7 @@ def main(argv):
     if (FLAGS.mode == 'train_then_eval' and FLAGS.eval_per_loop == False) or (FLAGS.eval_per_loop == True and FLAGS.save_only_last_ckpt == True):
       perform_evaluation(model, builder, eval_steps,
                          checkpoint_manager.latest_checkpoint, strategy,
-                         topology)
+                         topology, training_complete)
 
     plots_lib.gen_plots()
 

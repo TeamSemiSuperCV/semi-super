@@ -100,4 +100,8 @@ def gen_plots():
   with tf.io.gfile.GFile(flags_path, 'r') as f:
     flags_dict = json.load(f)
 
-  print_contrastive_history(train_df, flags_dict)
+  training = (FLAGS.mode == 'train' or FLAGS.mode == 'train_then_eval')
+  if training and FLAGS.train_mode == 'pretrain':
+    print_contrastive_history(train_df, flags_dict)
+
+
