@@ -739,7 +739,7 @@ def main(argv):
           train_multiple_steps(iterator)
           cur_step = global_step.numpy()
 
-          if FLAGS.save_only_last_ckpt == False or cur_step == train_steps:
+          if FLAGS.save_only_last_ckpt == False or cur_step >= train_steps:
             checkpoint_manager.save(cur_step)
           
           logging.info('Completed: %d / %d steps', cur_step, train_steps)
