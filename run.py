@@ -460,69 +460,77 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
     summary_writer.flush()
 
   # Record results as JSON.
-  result_json_path = os.path.join(FLAGS.model_dir, 'result.json')
-  result = {metric.name: metric.result().numpy() for metric in all_metrics}
-  result['global_step'] = global_step.numpy()
-  logging.info(result)
-  with tf.io.gfile.GFile(result_json_path, 'w') as f:
-    json.dump({k: float(v) for k, v in result.items()}, f)
-  result_json_path = os.path.join(
-      FLAGS.model_dir, 'result_%d.json'%result['global_step'])
-  with tf.io.gfile.GFile(result_json_path, 'w') as f:
-    json.dump({k: float(v) for k, v in result.items()}, f)
-  flag_json_path = os.path.join(FLAGS.model_dir, 'flags.json')
-  with tf.io.gfile.GFile(flag_json_path, 'w') as f:
-    serializable_flags = {}
-    for key, val in FLAGS.flag_values_dict().items():
-      # Some flag value types e.g. datetime.timedelta are not json serializable,
-      # filter those out.
-      if json_serializable(val):
-        serializable_flags[key] = val
-    json.dump(serializable_flags, f)
+  if FLAGS.mode == 'eval':
+    result_json_path = os.path.join(FLAGS.model_dir, 'result_eval.json')
+    result = {metric.name: metric.result().numpy() for metric in all_metrics}
+    result['global_step'] = global_step.numpy()
+    logging.info(result)
+    with tf.io.gfile.GFile(result_json_path, 'w') as f:
+      json.dump({k: float(v) for k, v in result.items()}, f)
+  else:
+    result_json_path = os.path.join(FLAGS.model_dir, 'result.json')
+    result = {metric.name: metric.result().numpy() for metric in all_metrics}
+    result['global_step'] = global_step.numpy()
+    logging.info(result)
+    with tf.io.gfile.GFile(result_json_path, 'w') as f:
+      json.dump({k: float(v) for k, v in result.items()}, f)
+    result_json_path = os.path.join(
+        FLAGS.model_dir, 'result_%d.json'%result['global_step'])
+    with tf.io.gfile.GFile(result_json_path, 'w') as f:
+      json.dump({k: float(v) for k, v in result.items()}, f)
+    flag_json_path = os.path.join(FLAGS.model_dir, 'flags.json')
+    with tf.io.gfile.GFile(flag_json_path, 'w') as f:
+      serializable_flags = {}
+      for key, val in FLAGS.flag_values_dict().items():
+        # Some flag value types e.g. datetime.timedelta are not json serializable,
+        # filter those out.
+        if json_serializable(val):
+          serializable_flags[key] = val
+      json.dump(serializable_flags, f)
 
-  # Export as SavedModel for finetuning and inference.
-  if training_complete:
-    save(model, global_step=result['global_step'])
+    # Export as SavedModel for finetuning and inference.
+    if training_complete:
+      save(model, global_step=result['global_step'])
 
-  # Export best acc model
-  if FLAGS.save_best_acc:
-    result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_acc.json')
-    if tf.io.gfile.exists(result_best_json_path):
-      with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
-        result_best = json.load(f)
+    # Export best acc model
+    if FLAGS.save_best_acc:
+      result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_acc.json')
+      if tf.io.gfile.exists(result_best_json_path):
+        with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
+          result_best = json.load(f)
 
-      is_best_acc = result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]
-      
-      if is_best_acc:
+        is_best_acc = result["eval/label_top_1_accuracy"] > result_best["eval/label_top_1_accuracy"]
+        
+        if is_best_acc:
+          save_best(model, global_step=result['global_step'], model_best_metric='acc')
+          with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+            json.dump({k: float(v) for k, v in result.items()}, f)
+
+      else:
         save_best(model, global_step=result['global_step'], model_best_metric='acc')
         with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
           json.dump({k: float(v) for k, v in result.items()}, f)
 
-    else:
-      save_best(model, global_step=result['global_step'], model_best_metric='acc')
-      with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
-        json.dump({k: float(v) for k, v in result.items()}, f)
+    # Export best loss model
+    if FLAGS.save_best_loss:
+      result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_loss.json')
+      if tf.io.gfile.exists(result_best_json_path):
+        with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
+          result_best = json.load(f)
 
-  # Export best loss model
-  if FLAGS.save_best_loss:
-    result_best_json_path = os.path.join(FLAGS.model_dir, 'result_best_loss.json')
-    if tf.io.gfile.exists(result_best_json_path):
-      with tf.io.gfile.GFile(result_best_json_path, 'r') as f:
-        result_best = json.load(f)
+        is_best_loss = result["eval/supervised_loss"] < result_best["eval/supervised_loss"]
+        
+        if is_best_loss:
+          save_best(model, global_step=result['global_step'], model_best_metric='loss')
+          with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
+            json.dump({k: float(v) for k, v in result.items()}, f)
 
-      is_best_loss = result["eval/supervised_loss"] < result_best["eval/supervised_loss"]
-      
-      if is_best_loss:
+      else:
         save_best(model, global_step=result['global_step'], model_best_metric='loss')
         with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
           json.dump({k: float(v) for k, v in result.items()}, f)
-
-    else:
-      save_best(model, global_step=result['global_step'], model_best_metric='loss')
-      with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
-        json.dump({k: float(v) for k, v in result.items()}, f)
-  
-  return result
+    
+    return result
 
 
 def _restore_latest_or_from_pretrain(checkpoint_manager):
@@ -607,7 +615,7 @@ def main(argv):
     for ckpt in tf.train.checkpoints_iterator(
         FLAGS.model_dir, min_interval_secs=15):
       result = perform_evaluation(model, builder, eval_steps, ckpt, strategy,
-                                  topology)
+                                  topology, training_complete=True)
       if result['global_step'] >= train_steps:
         logging.info('Eval complete. Exiting...')
         return
