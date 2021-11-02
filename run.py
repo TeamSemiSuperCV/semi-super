@@ -530,7 +530,7 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
         with tf.io.gfile.GFile(result_best_json_path, 'w') as f:
           json.dump({k: float(v) for k, v in result.items()}, f)
     
-    return result
+  return result
 
 
 def _restore_latest_or_from_pretrain(checkpoint_manager):
