@@ -775,7 +775,7 @@ def main(argv):
     if (FLAGS.mode == 'train_then_eval' and FLAGS.eval_per_loop == False) or (FLAGS.eval_per_loop == True and FLAGS.save_only_last_ckpt == True):
       perform_evaluation(model, builder, eval_steps,
                          checkpoint_manager.latest_checkpoint, strategy,
-                         topology, training_complete)
+                         topology, training_complete=True)
 
     plots_lib.gen_plots()
 
