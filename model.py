@@ -210,7 +210,9 @@ class ProjectionHead(tf.keras.layers.Layer):
     # The first element is the output of the projection head.
     # The second element is the input of the finetune head.
     proj_head_output = tf.identity(hiddens_list[-1], 'proj_head_output')
-    return proj_head_output, hiddens_list[FLAGS.ft_proj_selector]
+    sup_head_input = tf.identity(hiddens_list[FLAGS.ft_proj_selector], 'sup_head_input')
+
+    return proj_head_output, sup_head_input
 
 
 class SupervisedHead(tf.keras.layers.Layer):
