@@ -280,6 +280,7 @@ def get_salient_tensors_dict(include_projection_head):
   result['initial_max_pool'] = graph.get_tensor_by_name(
       'resnet/initial_max_pool/Identity:0')
   result['final_avg_pool'] = graph.get_tensor_by_name('resnet/final_avg_pool:0')
+  result['sup_head_input'] = graph.get_tensor_by_name('projection_head/sup_head_input:0')
   result['logits_sup'] = graph.get_tensor_by_name(
       'head_supervised/logits_sup:0')
   if include_projection_head:
