@@ -268,6 +268,10 @@ flags.DEFINE_boolean(
     'save_only_last_ckpt', True,
     'Save only last checkpoint. Intermediate ckpts are not saved.')
 
+flags.DEFINE_float(
+    'max_rot_angle', 0.0,
+    'Max rotation during data augmentation')
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()

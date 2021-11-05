@@ -19,6 +19,8 @@ import functools
 from absl import flags
 
 import tensorflow.compat.v2 as tf
+import tensorflow_addons as tfa
+import math as math
 
 FLAGS = flags.FLAGS
 
@@ -472,6 +474,10 @@ def preprocess_for_train(image,
   if color_distort:
     image = random_color_jitter(image, strength=FLAGS.color_jitter_strength,
                                 impl=impl)
+
+  angle_rad = FLAGS.max_rot_angle / 180. * math.pi
+  image = tfa.image.rotate(image, (tf.random.uniform(shape=(1,)) - 0.5) * 2 * angle_rad)
+
   image = tf.reshape(image, [height, width, 3])
   image = tf.clip_by_value(image, 0., 1.)
   return image
