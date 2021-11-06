@@ -272,6 +272,10 @@ flags.DEFINE_float(
     'max_rot_angle', 0.0,
     'Max rotation during data augmentation')
 
+flags.DEFINE_boolean(
+    'include_rotation', False,
+    'Include rotation in data augmentation.')
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
