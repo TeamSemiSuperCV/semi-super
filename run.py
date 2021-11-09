@@ -276,6 +276,14 @@ flags.DEFINE_boolean(
     'include_rotation', False,
     'Include rotation in data augmentation.')
 
+flags.DEFINE_boolean(
+    'distill_mode', False,
+    'Activate distillation mode.')
+
+flags.DEFINE_string(
+    'teacher_model_path', None,
+    'Load the given teacher model for distillation mode.')
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
@@ -619,6 +627,10 @@ def main(argv):
 
   with strategy.scope():
     model = model_lib.Model(num_classes)
+    if FLAGS.distill_mode:
+      logging.info('Distillation mode active')
+      logging.info('Restoring teacher model from: %s', FLAGS.teacher_model_path)
+      teacher_model = tf.saved_model.load(FLAGS.teacher_model_path)
 
   if FLAGS.mode == 'eval':
     for ckpt in tf.train.checkpoints_iterator(
@@ -686,6 +698,13 @@ def main(argv):
               'image', features[:, :, :, :3], step=optimizer.iterations + 1)
         projection_head_outputs, supervised_head_outputs = model(
             features, training=True)
+        
+        if FLAGS.distill_mode:
+          teacher_outputs = teacher_model(
+              features, trainable=False)['logits_sup']
+        else:
+          teacher_outputs = None
+
         loss = None
         if projection_head_outputs is not None:
           outputs = projection_head_outputs
@@ -708,12 +727,21 @@ def main(argv):
           l = labels['labels']
           if FLAGS.train_mode == 'pretrain' and FLAGS.lineareval_while_pretraining:
             l = tf.concat([l, l], 0)
-          sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
+          if FLAGS.distill_mode:
+            sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
+                student_logits=outputs, temperature=FLAGS.temperature)
+          else:
+            sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
           if loss is None:
             loss = sup_loss
           else:
             loss += sup_loss
-          metrics.update_finetune_metrics_train(supervised_loss_metric,
+          if FLAGS.distill_mode:
+            metrics.update_finetune_metrics_train(supervised_loss_metric,
+                                                supervised_acc_metric, sup_loss,
+                                                teacher_outputs, outputs)
+          else:
+            metrics.update_finetune_metrics_train(supervised_loss_metric,
                                                 supervised_acc_metric, sup_loss,
                                                 l, outputs)
         weight_decay = model_lib.add_weight_decay(

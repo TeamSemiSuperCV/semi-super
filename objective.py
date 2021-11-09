@@ -32,6 +32,14 @@ def add_supervised_loss(labels, logits):
   return tf.reduce_mean(losses)
 
 
+def add_kd_loss(teacher_logits, student_logits, temperature):
+  """Compute distillation loss."""
+  teacher_probs = tf.nn.softmax(teacher_logits / temperature)
+  kd_loss = tf.reduce_mean(temperature**2 * tf.nn.softmax_cross_entropy_with_logits(
+      teacher_probs, student_logits / temperature))
+  return kd_loss
+
+
 def add_contrastive_loss(hidden,
                          hidden_norm=True,
                          temperature=1.0,
