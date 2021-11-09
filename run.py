@@ -281,7 +281,7 @@ flags.DEFINE_boolean(
     'Activate distillation mode.')
 
 flags.DEFINE_string(
-    'teacher_model_path', None,
+    'teacher_model_dir', None,
     'Load the given teacher model for distillation mode.')
 
 def get_salient_tensors_dict(include_projection_head):
@@ -629,8 +629,8 @@ def main(argv):
     model = model_lib.Model(num_classes)
     if FLAGS.distill_mode:
       logging.info('Distillation mode active')
-      logging.info('Restoring teacher model from: %s', FLAGS.teacher_model_path)
-      teacher_model = tf.saved_model.load(FLAGS.teacher_model_path)
+      logging.info('Restoring teacher model from: %s', FLAGS.teacher_model_dir)
+      teacher_model = tf.saved_model.load(FLAGS.teacher_model_dir)
 
   if FLAGS.mode == 'eval':
     for ckpt in tf.train.checkpoints_iterator(
