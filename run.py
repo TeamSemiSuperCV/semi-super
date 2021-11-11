@@ -337,12 +337,19 @@ def build_saved_model(model, include_projection_head=True):
 
 def save(model, global_step):
   """Export as SavedModel for finetuning and inference."""
-  saved_model = build_saved_model(model)
-  export_dir = os.path.join(FLAGS.model_dir, 'saved_model')
-  checkpoint_export_dir = os.path.join(export_dir, str(global_step))
-  if tf.io.gfile.exists(checkpoint_export_dir):
-    tf.io.gfile.rmtree(checkpoint_export_dir)
-  tf.saved_model.save(saved_model, checkpoint_export_dir)
+  if FLAGS.distill_mode and FLAGS.keras_resnet50:
+    export_dir = os.path.join(FLAGS.model_dir, 'saved_model_keras')
+    checkpoint_export_dir = os.path.join(export_dir, str(global_step))
+    if tf.io.gfile.exists(checkpoint_export_dir):
+      tf.io.gfile.rmtree(checkpoint_export_dir)
+    tf.keras.models.save_model(model, checkpoint_export_dir)
+  else:
+    saved_model = build_saved_model(model)
+    export_dir = os.path.join(FLAGS.model_dir, 'saved_model')
+    checkpoint_export_dir = os.path.join(export_dir, str(global_step))
+    if tf.io.gfile.exists(checkpoint_export_dir):
+      tf.io.gfile.rmtree(checkpoint_export_dir)
+    tf.saved_model.save(saved_model, checkpoint_export_dir)
 
   if FLAGS.keep_hub_module_max > 0:
     # Delete old exported SavedModels.
@@ -447,13 +454,21 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
     logging.info('Performing eval at step %d', global_step.numpy())
 
   def single_step(features, labels):
-    _, supervised_head_outputs = model(features, training=False)
+    if FLAGS.distill_mode and FLAGS.keras_resnet50:
+      _, supervised_head_outputs = None, model(features, training=False)
+    else:
+      _, supervised_head_outputs = model(features, training=False)
     assert supervised_head_outputs is not None
     outputs = supervised_head_outputs
     l = labels['labels']
     metrics.update_finetune_metrics_eval(label_top_1_accuracy,
                                          label_top_5_accuracy, outputs, l)
-    reg_loss = model_lib.add_weight_decay(model, adjust_per_optimizer=True)
+    if FLAGS.distill_mode and FLAGS.keras_resnet50:
+      reg_loss = model_lib.add_weight_decay_keras(
+          model, adjust_per_optimizer=True)
+    else:
+      reg_loss = model_lib.add_weight_decay(
+          model, adjust_per_optimizer=True)
     regularization_loss.update_state(reg_loss)
     eval_sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
     eval_sup_loss_metric.update_state(eval_sup_loss)
