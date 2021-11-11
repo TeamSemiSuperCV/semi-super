@@ -744,7 +744,7 @@ def main(argv):
           if FLAGS.train_mode == 'pretrain' and FLAGS.lineareval_while_pretraining:
             l = tf.concat([l, l], 0)
           if FLAGS.distill_mode:
-            if FLAGS.keras_resnet50:
+            if FLAGS.keras_resnet50: # delete this conidtion
               sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
                   student_logits=outputs, temperature=FLAGS.temperature)
             else:
@@ -764,8 +764,12 @@ def main(argv):
             metrics.update_finetune_metrics_train(supervised_loss_metric,
                                                 supervised_acc_metric, sup_loss,
                                                 l, outputs)
-        weight_decay = model_lib.add_weight_decay(
-            model, adjust_per_optimizer=True)
+        if FLAGS.distill_mode and FLAGS.keras_resnet50:
+          weight_decay = model_lib.add_weight_decay_keras(
+              model, adjust_per_optimizer=True)
+        else:
+          weight_decay = model_lib.add_weight_decay(
+              model, adjust_per_optimizer=True)
         weight_decay_metric.update_state(weight_decay)
         loss += weight_decay
         total_loss_metric.update_state(loss)

@@ -44,6 +44,24 @@ def build_optimizer(learning_rate):
     raise ValueError('Unknown optimizer {}'.format(FLAGS.optimizer))
 
 
+def build_optimizer_keras(learning_rate):
+  """Returns the optimizer."""
+  if FLAGS.optimizer == 'momentum':
+    return tf.keras.optimizers.SGD(learning_rate, FLAGS.momentum, nesterov=True)
+  elif FLAGS.optimizer == 'adam':
+    return tf.keras.optimizers.Adam(learning_rate)
+  elif FLAGS.optimizer == 'lars':
+    return lars_optimizer.LARSOptimizer(
+        learning_rate,
+        momentum=FLAGS.momentum,
+        weight_decay=FLAGS.weight_decay,
+        exclude_from_weight_decay=[
+            'bn', 'bias', 'predictions'
+        ])
+  else:
+    raise ValueError('Unknown optimizer {}'.format(FLAGS.optimizer))
+
+
 def add_weight_decay(model, adjust_per_optimizer=True):
   """Compute weight decay from flags."""
   if adjust_per_optimizer and 'lars' in FLAGS.optimizer:
@@ -53,6 +71,31 @@ def add_weight_decay(model, adjust_per_optimizer=True):
         tf.nn.l2_loss(v)
         for v in model.trainable_variables
         if 'head_supervised' in v.name and 'bias' not in v.name
+    ]
+    if l2_losses:
+      return FLAGS.weight_decay * tf.add_n(l2_losses)
+    else:
+      return 0
+
+  # TODO(srbs): Think of a way to avoid name-based filtering here.
+  l2_losses = [
+      tf.nn.l2_loss(v)
+      for v in model.trainable_weights
+      if 'batch_normalization' not in v.name
+  ]
+  loss = FLAGS.weight_decay * tf.add_n(l2_losses)
+  return loss
+
+
+def add_weight_decay_keras(model, adjust_per_optimizer=True):
+  """Compute weight decay from flags."""
+  if adjust_per_optimizer and 'lars' in FLAGS.optimizer:
+    # Weight decay are taking care of by optimizer for these cases.
+    # Except for supervised head, which will be added here.
+    l2_losses = [
+        tf.nn.l2_loss(v)
+        for v in model.trainable_variables
+        if 'predictions' in v.name and 'bias' not in v.name
     ]
     if l2_losses:
       return FLAGS.weight_decay * tf.add_n(l2_losses)
