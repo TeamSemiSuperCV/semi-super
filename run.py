@@ -634,7 +634,7 @@ def main(argv):
       input_shape = (FLAGS.image_size, FLAGS.image_size, 3)
       keras_inputs = tf.keras.Input(shape=input_shape)
       keras_outputs = tf.keras.applications.ResNet50(weights=None,
-          input_shape=input_shape, classes=num_classes)(keras_inputs)
+          input_shape=input_shape, classes=num_classes, classifier_activation=None)(keras_inputs)
       model = tf.keras.Model(keras_inputs, keras_outputs)
       logging.info('Loaded Keras ResNet50 as student model')
     else:
@@ -745,8 +745,8 @@ def main(argv):
             l = tf.concat([l, l], 0)
           if FLAGS.distill_mode:
             if FLAGS.keras_resnet50:
-              sup_loss = obj_lib.add_kd_loss_keras(teacher_logits=teacher_outputs, 
-                  student_probs=outputs, temperature=FLAGS.temperature)
+              sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
+                  student_logits=outputs, temperature=FLAGS.temperature)
             else:
               sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
                   student_logits=outputs, temperature=FLAGS.temperature)
