@@ -647,10 +647,6 @@ def main(argv):
   with strategy.scope():
     if FLAGS.distill_mode and FLAGS.keras_resnet50:
       input_shape = (FLAGS.image_size, FLAGS.image_size, 3)
-      # keras_inputs = tf.keras.Input(shape=input_shape)
-      # keras_outputs = tf.keras.applications.ResNet50(weights=None,
-      #     input_shape=input_shape, classes=num_classes, classifier_activation=None)(keras_inputs)
-      # model = tf.keras.Model(keras_inputs, keras_outputs)
       model = tf.keras.applications.ResNet50(weights=None,
           input_shape=input_shape, classes=num_classes, classifier_activation=None)
       logging.info('Loaded Keras ResNet50 as student model')
@@ -761,12 +757,8 @@ def main(argv):
           if FLAGS.train_mode == 'pretrain' and FLAGS.lineareval_while_pretraining:
             l = tf.concat([l, l], 0)
           if FLAGS.distill_mode:
-            if FLAGS.keras_resnet50: # delete this conidtion
-              sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
-                  student_logits=outputs, temperature=FLAGS.temperature)
-            else:
-              sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
-                  student_logits=outputs, temperature=FLAGS.temperature)
+            sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
+                student_logits=outputs, temperature=FLAGS.temperature)
           else:
             sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
           if loss is None:
