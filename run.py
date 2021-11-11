@@ -284,6 +284,10 @@ flags.DEFINE_string(
     'teacher_model_dir', None,
     'Load the given teacher model for distillation mode.')
 
+flags.DEFINE_boolean(
+    'keras_resnet50', False,
+    'Use Keras ResNet50 as student model.')
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
@@ -385,7 +389,7 @@ def try_restore_from_checkpoint(model, global_step, optimizer):
     # Restore model weights, global step, optimizer states
     logging.info('Restoring from latest checkpoint: %s', latest_ckpt)
     checkpoint_manager.checkpoint.restore(latest_ckpt).expect_partial()
-  elif FLAGS.checkpoint:
+  elif FLAGS.checkpoint and FLAGS.keras_resnet50 == False:
     # Restore model weights only, but not global step and optimizer states
     logging.info('Restoring from given checkpoint: %s', FLAGS.checkpoint)
     checkpoint_manager2 = tf.train.CheckpointManager(
@@ -626,7 +630,15 @@ def main(argv):
                  strategy.num_replicas_in_sync)
 
   with strategy.scope():
-    model = model_lib.Model(num_classes)
+    if FLAGS.distill_mode and FLAGS.keras_resnet50:
+      input_shape = (FLAGS.image_size, FLAGS.image_size, 3)
+      keras_inputs = tf.keras.Input(shape=input_shape)
+      keras_outputs = tf.keras.applications.ResNet50(weights=None,
+          input_shape=input_shape, classes=num_classes)(keras_inputs)
+      model = tf.keras.Model(keras_inputs, keras_outputs)
+      logging.info('Loaded Keras ResNet50 as student model')
+    else:
+      model = model_lib.Model(num_classes)
     if FLAGS.distill_mode:
       logging.info('Distillation mode active')
       logging.info('Restoring teacher model from: %s', FLAGS.teacher_model_dir)
@@ -696,8 +708,12 @@ def main(argv):
           # Only log augmented images for the first tower.
           tf.summary.image(
               'image', features[:, :, :, :3], step=optimizer.iterations + 1)
-        projection_head_outputs, supervised_head_outputs = model(
-            features, training=True)
+        if FLAGS.distill_mode and FLAGS.keras_resnet50:
+          projection_head_outputs, supervised_head_outputs = None, model(
+              features, training=True)
+        else:
+          projection_head_outputs, supervised_head_outputs = model(
+              features, training=True)
         
         if FLAGS.distill_mode:
           teacher_outputs = teacher_model(
@@ -728,8 +744,12 @@ def main(argv):
           if FLAGS.train_mode == 'pretrain' and FLAGS.lineareval_while_pretraining:
             l = tf.concat([l, l], 0)
           if FLAGS.distill_mode:
-            sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
-                student_logits=outputs, temperature=FLAGS.temperature)
+            if FLAGS.keras_resnet50:
+              sup_loss = obj_lib.add_kd_loss_keras(teacher_logits=teacher_outputs, 
+                  student_probs=outputs, temperature=FLAGS.temperature)
+            else:
+              sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
+                  student_logits=outputs, temperature=FLAGS.temperature)
           else:
             sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
           if loss is None:
