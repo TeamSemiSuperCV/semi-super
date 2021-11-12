@@ -56,7 +56,7 @@ def build_optimizer_keras(learning_rate):
         momentum=FLAGS.momentum,
         weight_decay=FLAGS.weight_decay,
         exclude_from_weight_decay=[
-            'bn', 'bias', 'predictions'
+            'bn', 'batch_normalization', 'bias', 'dense'
         ])
   else:
     raise ValueError('Unknown optimizer {}'.format(FLAGS.optimizer))
@@ -95,7 +95,7 @@ def add_weight_decay_keras(model, adjust_per_optimizer=True):
     l2_losses = [
         tf.nn.l2_loss(v)
         for v in model.trainable_variables
-        if 'predictions' in v.name and 'bias' not in v.name
+        if 'dense' in v.name and 'bias' not in v.name
     ]
     if l2_losses:
       return FLAGS.weight_decay * tf.add_n(l2_losses)
@@ -336,12 +336,10 @@ def resnet50_mod(input_shape, num_classes):
     x = base_model(inputs)
     x = tf.keras.layers.Dropout(0.4)(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dense(64, activation='relu', kernel_initializer=initializer,
-            kernel_regularizer=tf.keras.regularizers.L2(1e-4))(x)
+    x = tf.keras.layers.Dense(64, activation='relu', kernel_initializer=initializer)(x)
     x = tf.keras.layers.Dropout(0.4)(x)
     x = tf.keras.layers.BatchNormalization()(x)
-    outputs = tf.keras.layers.Dense(num_classes, kernel_initializer=initializer,
-                    kernel_regularizer=tf.keras.regularizers.L2(1e-4))(x)
+    outputs = tf.keras.layers.Dense(num_classes, kernel_initializer=initializer)(x)
     
     model = tf.keras.models.Model(inputs=inputs, outputs=outputs)
     return model
