@@ -68,7 +68,7 @@ def gen_tsne(featlayer, batch_t):
     # generates a file ./static/tsne.png
     labels, features = get_feats_for_tsne(featlayer, batch_t)
     # RUN PCA
-    pca = PCA(n_components=50)
+    pca = PCA(n_components=25)
     X = pca.fit_transform(features)
     # RUN TSNE
     #tsne =  TSNE(perplexity=79 ,n_components=2, metric='euclidean', random_state=2)
