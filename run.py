@@ -647,8 +647,9 @@ def main(argv):
   with strategy.scope():
     if FLAGS.distill_mode and FLAGS.keras_resnet50:
       input_shape = (FLAGS.image_size, FLAGS.image_size, 3)
-      model = tf.keras.applications.ResNet50(weights=None,
-          input_shape=input_shape, classes=num_classes, classifier_activation=None)
+      # model = tf.keras.applications.ResNet50(weights=None,
+      #     input_shape=input_shape, classes=num_classes, classifier_activation=None)
+      model = model_lib.resnet50_mod(input_shape, num_classes)
       logging.info('Loaded Keras ResNet50 as student model')
     else:
       model = model_lib.Model(num_classes)
