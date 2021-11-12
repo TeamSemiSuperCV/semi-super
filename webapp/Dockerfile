@@ -1,9 +1,22 @@
-FROM ubuntu
-RUN apt update
-RUN apt install -y python3-pip
-RUN pip3 install --upgrade pip
-RUN pip3 install tensorflow-cpu pillow fastapi uvicorn jinja2 python-multipart
-RUN pip3 uninstall -y keras
-COPY . /app
+# first stage
+FROM python:3.8-slim AS builder
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential gcc
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+RUN pip uninstall -y keras
+
+# second stage
+FROM python:3.8-slim AS image
+
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 WORKDIR /app
-CMD python3 fapi.py
+COPY . .
+EXPOSE 8080
+CMD [ "python", "fapi.py" ]

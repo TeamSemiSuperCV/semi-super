@@ -1,8 +1,6 @@
 from time import time
 
-import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import tensorflow as tf
 import uvicorn
 from fastapi import FastAPI, File, Request, UploadFile
@@ -10,8 +8,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
 from tensorflow.keras import Input
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.layers import (BatchNormalization, Dense, Dropout,
@@ -20,6 +16,7 @@ from tensorflow.keras.layers.experimental.preprocessing import Rescaling
 from tensorflow.keras.models import Model
 
 from grad_cam import GradCam
+from tsne import TSNE
 
 IMG_SIZE = (256, 256, 3)
 
@@ -63,69 +60,6 @@ def gen_heatmaps(batch_t, img):
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
 
 
-def gen_tsne(featlayer, batch_t):
-    # generates 2d static tse image
-    # generates a file ./static/tsne.png
-    labels, features = get_feats_for_tsne(featlayer, batch_t)
-    # RUN PCA
-    pca = PCA(n_components=25)
-    X = pca.fit_transform(features)
-    # RUN TSNE
-    #tsne =  TSNE(perplexity=79 ,n_components=2, metric='euclidean', random_state=2)
-    tsne = TSNE(perplexity=50, n_components=2,
-                metric='euclidean', random_state=2)
-    tsne_result = tsne.fit_transform(X)
-
-        # PLOT THE RESULTS
-    sns.set(font_scale = 1.5)
-    sns.set_style("white")
-    fig,ax = plt.subplots(1,1,figsize=(8,8));
-    dotsize = (labels==2)+1.
-    log_0 = labels == 0
-    log_1 = labels == 1
-    log_2 = labels == 2
-    plt.scatter(x=tsne_result[log_0,0], y=tsne_result[log_0,1],
-                c= '#30a2da', #c='#e5ae38', #c= '#fc4f30', #c='gray', #c='tomato',
-                s=20, alpha=0.5, label='Normal')
-    plt.scatter(x=tsne_result[log_1,0], y=tsne_result[log_1,1],
-                c= '#e5ae38', #'#fc4f30', #c='#6d904f', #c= '#30a2da', #c='red', #c='royalblue',
-                s=20, alpha=0.5, label='Pneumonia')
-    plt.scatter(x=tsne_result[log_2,0], y=tsne_result[log_2,1],
-                c='black',
-                s=200, alpha=1,marker='*', label='Diagnosed')
-
-    # sns.scatterplot(x=tsne_result[:,0], y=tsne_result[:,1], hue=labels, ax=ax,size=dotsize,alpha=.8, palette="colorblind")
-    sns.despine()
-    lim = (tsne_result.min()-5, tsne_result.max()+5)
-    ax.set_xlim(lim)
-    ax.set_ylim(lim)
-    ax.set_aspect('equal')
-    ax.set_title('tSNE')
-    ax.set_xlabel('component 1')
-    ax.set_ylabel('component 2')
-    ax.set_xticks([])
-    ax.set_yticks([])
-    #ax.legend(bbox_to_anchor=(0.01, 0.99), loc=2, borderaxespad=0.0, frameon=False);
-    ax.legend(loc='best', borderaxespad=0.0, frameon=False, labelspacing=0.25,handletextpad=-.25);
-    plt.savefig('static/tsne.png')
-
-
-def get_feats_for_tsne(featlayer, batch_t):
-    # gets the features from the dense layers
-    # returns (labels, features, thisfeat)
-    # load previous features
-    features = npfile['feats']
-    labels = npfile['labels']
-    # add an extra label for this image (we want a it a different color)
-    thislabel = np.max(labels)+1
-    # get the output of the dense layer for this particular image
-    thisfeat = featlayer.predict(batch_t)
-    # add this image's data to (labels, features)
-    labels = np.append(labels, thislabel)
-    features = np.concatenate((features, thisfeat), axis=0)
-    return(labels, features)
-
-
 def img_predict(img_fname, request):
     img = np.array(Image.open('static/' + img_fname))
     if len(img.shape) == 2:
@@ -138,7 +72,7 @@ def img_predict(img_fname, request):
     print(f'{img_fname} ==> {pred_prob}')
 
     gen_heatmaps(batch_t, img)
-    gen_tsne(featLayer_fsl, batch_t)
+    tsne.gen_tsne(batch_t, 'static/tsne.png')
 
     rand_refresh = str(int(time() % 8192))
     return templates.TemplateResponse("diagnose.html",
@@ -189,15 +123,8 @@ def main():
     model_fsl.load_weights('FSL_ResNet50_XrayRemix.h5')
     model_fsl.trainable = False
 
-    # modeloutput of feature layers (model_fsl)
-    global featLayer_fsl
-    layer = [model_fsl.get_layer('dense').output]
-    featLayer_fsl = Model(inputs=model_fsl.input, outputs=layer)
-
-
-
-    global npfile
-    npfile = np.load('tsne_feats.npz')
+    global tsne
+    tsne = TSNE(model_fsl, 'dense')
 
     global gc_fsl, gc_ssl
     gc_fsl = GradCam(model_fsl, 'lambda_1', 'jet_colors.npy')  # FSL
