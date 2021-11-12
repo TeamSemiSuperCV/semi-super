@@ -328,7 +328,7 @@ class Model(tf.keras.models.Model):
 def resnet50_mod(input_shape, num_classes):
     initializer = 'glorot_normal'
     
-    base_model = tf.keras.models.ResNet50(include_top=False, pooling='max', weights=None,
+    base_model = tf.keras.applications.ResNet50(include_top=False, pooling='max', weights=None,
                           input_shape=input_shape)
     base_model.trainable = True
 
