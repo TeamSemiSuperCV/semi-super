@@ -63,10 +63,10 @@ def gen_heatmaps(batch_t, img):
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
 
 
-def gen_tsne(batch_t):
+def gen_tsne(featlayer, batch_t):
     # generates 2d static tse image
     # generates a file ./static/tsne.png
-    labels, features = get_feats_for_tsne(featLayer_fsl, batch_t)
+    labels, features = get_feats_for_tsne(featlayer, batch_t)
     # RUN PCA
     pca = PCA(n_components=50)
     X = pca.fit_transform(features)
@@ -138,7 +138,7 @@ def img_predict(img_fname, request):
     print(f'{img_fname} ==> {pred_prob}')
 
     gen_heatmaps(batch_t, img)
-    gen_tsne(model_fsl, batch_t)
+    gen_tsne(featLayer_fsl, batch_t)
 
     rand_refresh = str(int(time() % 8192))
     return templates.TemplateResponse("diagnose.html",
@@ -192,7 +192,7 @@ def main():
     # modeloutput of feature layers (model_fsl)
     global featLayer_fsl
     layer = [model_fsl.get_layer('dense').output]
-    featLayer_fsl = Model(inputs=model.input, outputs=layer)
+    featLayer_fsl = Model(inputs=model_fsl.input, outputs=layer)
 
 
 
