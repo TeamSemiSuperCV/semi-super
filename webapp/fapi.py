@@ -63,26 +63,39 @@ def gen_heatmaps(batch_t, img):
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
 
 
-def gen_tsne(model, batch_t):
+def gen_tsne(batch_t):
     # generates 2d static tse image
     # generates a file ./static/tsne.png
-    labels, features = get_feats_for_tsne(model, batch_t)
+    labels, features = get_feats_for_tsne(featLayer_fsl, batch_t)
     # RUN PCA
     pca = PCA(n_components=50)
     X = pca.fit_transform(features)
     # RUN TSNE
     #tsne =  TSNE(perplexity=79 ,n_components=2, metric='euclidean', random_state=2)
-    tsne = TSNE(perplexity=20, n_components=2,
+    tsne = TSNE(perplexity=50, n_components=2,
                 metric='euclidean', random_state=2)
     tsne_result = tsne.fit_transform(X)
 
-    # PLOT THE RESULTS
-    sns.set(font_scale=1.5)
-    sns.color_palette("colorblind")
+        # PLOT THE RESULTS
+    sns.set(font_scale = 1.5)
     sns.set_style("white")
-    fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-    sns.scatterplot(x=tsne_result[:, 0],
-                    y=tsne_result[:, 1], hue=labels, ax=ax, s=20)
+    fig,ax = plt.subplots(1,1,figsize=(8,8));
+    dotsize = (labels==2)+1.
+    log_0 = labels == 0
+    log_1 = labels == 1
+    log_2 = labels == 2
+    plt.scatter(x=tsne_result[log_0,0], y=tsne_result[log_0,1],
+                c= '#30a2da', #c='#e5ae38', #c= '#fc4f30', #c='gray', #c='tomato',
+                s=20, alpha=0.5, label='Normal')
+    plt.scatter(x=tsne_result[log_1,0], y=tsne_result[log_1,1],
+                c= '#fc4f30', #c='#6d904f', #c= '#30a2da', #c='red', #c='royalblue',
+                s=20, alpha=0.5, label='Pneumonia')
+    plt.scatter(x=tsne_result[log_2,0], y=tsne_result[log_2,1],
+                c='black',
+                s=200, alpha=1,marker='*', label='Diagnosed')
+
+    # sns.scatterplot(x=tsne_result[:,0], y=tsne_result[:,1], hue=labels, ax=ax,size=dotsize,alpha=.8, palette="colorblind")
+    sns.despine()
     lim = (tsne_result.min()-5, tsne_result.max()+5)
     ax.set_xlim(lim)
     ax.set_ylim(lim)
@@ -90,11 +103,14 @@ def gen_tsne(model, batch_t):
     ax.set_title('tSNE')
     ax.set_xlabel('component 1')
     ax.set_ylabel('component 2')
-    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    #ax.legend(bbox_to_anchor=(0.01, 0.99), loc=2, borderaxespad=0.0, frameon=False);
+    ax.legend(loc='best', borderaxespad=0.0, frameon=False, labelspacing=0.25,handletextpad=-.25);
     plt.savefig('static/tsne.png')
 
 
-def get_feats_for_tsne(model, batch_t):
+def get_feats_for_tsne(featlayer, batch_t):
     # gets the features from the dense layers
     # returns (labels, features, thisfeat)
     # load previous features
@@ -103,9 +119,7 @@ def get_feats_for_tsne(model, batch_t):
     # add an extra label for this image (we want a it a different color)
     thislabel = np.max(labels)+1
     # get the output of the dense layer for this particular image
-    layer = [model.get_layer('dense').output]
-    model_d = Model(inputs=model.input, outputs=layer)
-    thisfeat = model_d.predict(batch_t)
+    thisfeat = featlayer.predict(batch_t)
     # add this image's data to (labels, features)
     labels = np.append(labels, thislabel)
     features = np.concatenate((features, thisfeat), axis=0)
@@ -168,11 +182,19 @@ def make_model(input_shape):
 
 
 def main():
+    # fully supervised model
     global model_fsl
     model_fsl = make_model(IMG_SIZE)
     model_fsl.build(IMG_SIZE)
     model_fsl.load_weights('FSL_ResNet50_XrayRemix.h5')
     model_fsl.trainable = False
+
+    # modeloutput of feature layers (model_fsl)
+    global featLayer_fsl
+    layer = [model_fsl.get_layer('dense').output]
+    featLayer_fsl = Model(inputs=model.input, outputs=layer)
+
+
 
     global npfile
     npfile = np.load('tsne_feats.npz')
