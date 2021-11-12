@@ -88,7 +88,7 @@ def gen_tsne(featlayer, batch_t):
                 c= '#30a2da', #c='#e5ae38', #c= '#fc4f30', #c='gray', #c='tomato',
                 s=20, alpha=0.5, label='Normal')
     plt.scatter(x=tsne_result[log_1,0], y=tsne_result[log_1,1],
-                c= '#fc4f30', #c='#6d904f', #c= '#30a2da', #c='red', #c='royalblue',
+                c= '#e5ae38', #'#fc4f30', #c='#6d904f', #c= '#30a2da', #c='red', #c='royalblue',
                 s=20, alpha=0.5, label='Pneumonia')
     plt.scatter(x=tsne_result[log_2,0], y=tsne_result[log_2,1],
                 c='black',
