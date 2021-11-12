@@ -470,14 +470,14 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
 
   # Record results as JSON.
   if FLAGS.mode == 'eval':
-    result_json_path = os.path.join(FLAGS.model_dir, 'result_eval.json')
+    result_json_path = os.path.join(FLAGS.model_dir, 'result_{}.json'.format(FLAGS.eval_split))
     result = {metric.name: metric.result().numpy() for metric in all_metrics}
     result['global_step'] = global_step.numpy()
     logging.info(result)
     with tf.io.gfile.GFile(result_json_path, 'w') as f:
       json.dump({k: float(v) for k, v in result.items()}, f)
   else:
-    result_json_path = os.path.join(FLAGS.model_dir, 'result.json')
+    result_json_path = os.path.join(FLAGS.model_dir, 'result_{}.json'.format(FLAGS.eval_split))
     result = {metric.name: metric.result().numpy() for metric in all_metrics}
     result['global_step'] = global_step.numpy()
     logging.info(result)
