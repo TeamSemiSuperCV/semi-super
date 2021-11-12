@@ -7,7 +7,10 @@ class GradCam():
     def __init__(self, model, last_conv_layer,
                  cmap_fpath, alpha=0.35, beta=0.7) -> None:
         self.model = model
-        self.last_conv_layer = last_conv_layer
+        if isinstance(last_conv_layer, str):
+            self.last_conv_layer = self.model.get_layer(last_conv_layer)
+        else:
+            self.last_conv_layer = last_conv_layer
         self.alpha = tf.constant(alpha)
         self.beta = tf.constant(beta)
         self.jet_colors = np.load(cmap_fpath)
@@ -16,22 +19,20 @@ class GradCam():
         # Create Grad-CAM heatmap of single image
         assert len(img_batch.shape) == 4 and img_batch.shape[0] == 1
 
-        # First, we create a model that maps the input image to the activations
-        # of the last conv layer as well as the output predictions
-        if isinstance(self.last_conv_layer, str):
-            last_conv_layer = self.model.get_layer(self.last_conv_layer)
-        grad_model = tf.keras.models.Model(
-            [self.model.inputs], [last_conv_layer.output, self.model.output]
-        )
-
         # Grad-CAM requires model's output to be logits
         last_activation = self.model.layers[-1].activation
         self.model.layers[-1].activation = None
 
+        # First, we create a model that maps the input image to the activations
+        # of the last conv layer as well as the output predictions
+        self.grad_model = tf.keras.models.Model(
+            [self.model.inputs], [self.last_conv_layer.output, self.model.output]
+        )
+
         # Then, we compute the gradient of the top predicted class for our input image
         # with respect to the activations of the last conv layer
         with tf.GradientTape() as tape:
-            last_conv_layer_output, preds = grad_model(img_batch)
+            last_conv_layer_output, preds = self.grad_model(img_batch)
             if pred_index is None:  # then pick the highest-probability class
                 pred_index = tf.argmax(preds[0])
             class_channel = preds[:, pred_index]
