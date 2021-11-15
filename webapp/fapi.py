@@ -120,7 +120,7 @@ def main():
     global model_fsl
     model_fsl = make_model(IMG_SIZE)
     model_fsl.build(IMG_SIZE)
-    model_fsl.load_weights('FSL_ResNet50_XrayRemix.h5')
+    model_fsl.load_weights('FSL_ResNet50_XrayReborn.h5')
     model_fsl.trainable = False
 
     global tsne
