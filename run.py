@@ -276,6 +276,10 @@ flags.DEFINE_boolean(
     'include_rotation', False,
     'Include rotation in data augmentation.')
 
+flags.DEFINE_boolean(
+    'vertical_flip', False,
+    'Include vertical_flip in data augmentation.')
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
