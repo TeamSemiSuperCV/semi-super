@@ -325,15 +325,36 @@ class Model(tf.keras.models.Model):
       return projection_head_outputs, None
 
 
+# def resnet50_mod(input_shape, num_classes):
+#     initializer = 'glorot_normal'
+    
+#     base_model = tf.keras.applications.ResNet50(include_top=False, pooling='max', weights=None,
+#                           input_shape=input_shape)
+#     base_model.trainable = True
+
+#     inputs = tf.keras.layers.Input(shape=input_shape)
+#     x = base_model(inputs)
+#     x = tf.keras.layers.Dropout(0.4)(x)
+#     x = tf.keras.layers.BatchNormalization()(x)
+#     x = tf.keras.layers.Dense(64, activation='relu', kernel_initializer=initializer)(x)
+#     x = tf.keras.layers.Dropout(0.4)(x)
+#     x = tf.keras.layers.BatchNormalization()(x)
+#     outputs = tf.keras.layers.Dense(num_classes, kernel_initializer=initializer)(x)
+    
+#     model = tf.keras.models.Model(inputs=inputs, outputs=outputs)
+#     return model
+
 def resnet50_mod(input_shape, num_classes):
     initializer = 'glorot_normal'
     
-    base_model = tf.keras.applications.ResNet50(include_top=False, pooling='max', weights=None,
+    base_model = tf.keras.applications.ResNet50(include_top=False, pooling=None, weights=None,
                           input_shape=input_shape)
     base_model.trainable = True
 
     inputs = tf.keras.layers.Input(shape=input_shape)
     x = base_model(inputs)
+    x = tf.keras.layers.Lambda(lambda x: x, name='lambda_1')(x)
+    x = tf.keras.layers.GlobalMaxPooling2D()(x)
     x = tf.keras.layers.Dropout(0.4)(x)
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dense(64, activation='relu', kernel_initializer=initializer)(x)
