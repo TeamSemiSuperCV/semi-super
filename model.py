@@ -351,7 +351,7 @@ def resnet50_mod(input_shape, num_classes):
                           input_shape=input_shape)
     base_model.trainable = True
 
-    inputs = tf.keras.layers.Input(shape=input_shape)
+    # inputs = tf.keras.layers.Input(shape=input_shape)
     # x = base_model(inputs)
     # x = tf.keras.layers.Lambda(lambda x: x, name='lambda_1')(x)
     x = base_model.output
