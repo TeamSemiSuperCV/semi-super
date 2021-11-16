@@ -353,7 +353,7 @@ def resnet50_mod(input_shape, num_classes):
 
     inputs = tf.keras.layers.Input(shape=input_shape)
     x = base_model(inputs)
-    x = tf.keras.layers.Lambda(lambda x: x, name='lambda_1')(x)
+    # x = tf.keras.layers.Lambda(lambda x: x, name='lambda_1')(x)
     x = tf.keras.layers.GlobalMaxPooling2D()(x)
     x = tf.keras.layers.Dropout(0.4)(x)
     x = tf.keras.layers.BatchNormalization()(x)
