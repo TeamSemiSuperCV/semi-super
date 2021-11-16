@@ -363,5 +363,5 @@ def resnet50_mod(input_shape, num_classes):
     x = tf.keras.layers.BatchNormalization()(x)
     outputs = tf.keras.layers.Dense(num_classes, kernel_initializer=initializer)(x)
     
-    model = tf.keras.models.Model(inputs=inputs, outputs=outputs)
+    model = tf.keras.models.Model(inputs=base_model.input, outputs=outputs)
     return model
