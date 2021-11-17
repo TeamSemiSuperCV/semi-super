@@ -54,11 +54,14 @@ async def form(request: Request, file: UploadFile = File(...)):
     return img_predict('upload.jpeg', request)
 
 
-def gen_heatmaps(batch_t, img):
-    superimp_ssl = gc_ssl.gen_color_heatmap(batch_t, img, 0)  # SSL Model
-    superimp_fsl = gc_fsl.gen_color_heatmap(batch_t, img, 0)  # FSL Model
-    tf.io.write_file('static/saliency2.jpeg', tf.io.encode_jpeg(superimp_ssl))
+def gen_heatmap_fsl(batch_t, img):
+    superimp_fsl = gc_fsl.gen_grayscale_heatmap(batch_t, img, 0)  # FSL Model
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
+
+
+def gen_heatmap_ssl(batch_t, img):
+    superimp_ssl = gc_ssl.gen_color_heatmap(batch_t, img, 1)  # SSL Model
+    tf.io.write_file('static/saliency2.jpeg', tf.io.encode_jpeg(superimp_ssl))
 
 
 def img_predict(img_fname, request):
@@ -67,20 +70,30 @@ def img_predict(img_fname, request):
         img = np.stack([img] * 3, axis=-1)
 
     batch = np.expand_dims(img, axis=0)
-    # batch_t = img_preprocess_fsl(batch)  # FSL Model
+    batch_t_fsl = img_preprocess_fsl(batch)  # FSL Model
+    batch_t_ssl = img_preprocess_ssl(batch)  # SSL Model
     # pred = model_fsl.predict(batch_t)    # FSL Model
-    batch_t = img_preprocess_ssl(batch)  # SSL Model
-    pred = tf.nn.softmax(model_ssl.predict(batch_t)).numpy()  # SSL Model
-    pred_prob = f'{pred[0][0]:.3f}'
+    pred = tf.nn.softmax(model_ssl.predict(batch_t_ssl)).numpy()  # SSL Model
+    if pred[0][1] > 0.5:
+        diagnosis = 'PNEUMONIA'
+        pred_prob = f'{pred[0][1] * 100:.0f}%'  # SSL Model
+        # pred_prob = f'{pred[0][0] * 100:.0f}'  # FSL Model
+    else:
+        diagnosis = 'NORMAL'
+        pred_prob = f'{pred[0][0] * 100:.0f}%'  # SSL Model
+        # pred_prob = f'{(1 - pred[0][0]) * 100:.0f}'  # FSL Model
+    prediction = f'P( {diagnosis} ) = {pred_prob}'
     print(f'{img_fname} ==> {pred_prob}')
 
-    gen_heatmaps(batch_t, img)
-    tsne.gen_tsne(batch_t, 'static/tsne.png')
+    gen_heatmap_fsl(batch_t_fsl, img)
+    gen_heatmap_ssl(batch_t_ssl, img)
+
+    tsne.gen_tsne(batch_t_ssl, 'static/tsne.png')
 
     rand_refresh = str(int(time() % 8192))
     return templates.TemplateResponse("diagnose.html",
                                       {"request": request,
-                                       "probability": pred_prob,
+                                       "prediction": prediction,
                                        "f_example": f'{img_fname}?{rand_refresh}',
                                        "f_tsne": f'tsne.png?{rand_refresh}',
                                        "f_saliency1": f'saliency1.jpeg?{rand_refresh}',
@@ -100,17 +113,17 @@ def img_preprocess_ssl(imgs):
     return imgs
 
 
-def model_preprocess(x):
+def model_fsl_preprocess(x):
     x = Rescaling(1/255)(x)
     return x
 
 
-def make_model(input_shape):
+def make_model_fsl(input_shape):
     base_model = ResNet50(include_top=False, pooling=None, weights=None,
                           input_shape=input_shape)
 
     inputs = Input(shape=input_shape)
-    x = model_preprocess(inputs)
+    x = model_fsl_preprocess(inputs)
     x = base_model(x)
     x = Lambda(lambda x: x, name='lambda_1')(x)
     x = GlobalMaxPooling2D()(x)
@@ -128,7 +141,7 @@ def make_model(input_shape):
 def main():
     # fully-supervised model
     global model_fsl
-    model_fsl = make_model(IMG_SIZE_FSL)
+    model_fsl = make_model_fsl(IMG_SIZE_FSL)
     model_fsl.build(IMG_SIZE_FSL)
     model_fsl.load_weights('FSL_ResNet50_XrayReborn.h5')
     model_fsl.trainable = False
@@ -141,7 +154,7 @@ def main():
 
     global tsne
     # tsne = TSNE(model_fsl, 'dense', 'tsne_feats_fsl.npz')  # FSL
-    tsne = TSNE(model_fsl, 'dense', 'tsne_feats_ssl.npz')  # SSL
+    tsne = TSNE(model_ssl, 'dense', 'tsne_feats_ssl.npz')  # SSL
 
     global gc_fsl, gc_ssl
     gc_fsl = GradCam(model_fsl, 'lambda_1', 'jet_colors.npy')  # FSL

@@ -26,7 +26,7 @@
             <div class="row pt-5" style="height: 475px;">
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_example) }}" , height="400">
-                    <h4 class="text-warning mt-1 ml-4"> P( pneumonia ) = {{ probability }}</h4>
+                    <h4 class="text-warning mt-1 ml-4">{{ prediction }}</h4>
                 </div>
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_saliency2) }}" , height="400">
@@ -36,7 +36,7 @@
             <div class="row pt-4" style="height: 475px;">
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_tsne) }}" , height="400">
-                    <h4 class="text-info mt-1 ml-4">t-SNE Map</h4>
+                    <h4 class="text-info mt-1 ml-4">t-SNE Clustering</h4>
                 </div>
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_saliency1) }}" , height="400">
