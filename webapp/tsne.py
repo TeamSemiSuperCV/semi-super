@@ -10,12 +10,12 @@ RAND_STATE = 42
 
 class TSNE():
 
-    def __init__(self, model, layer_name):
+    def __init__(self, model, layer_name, feats_npz):
         feat_output = model.get_layer(layer_name).output
         self.model = Model(inputs=model.input, outputs=feat_output)
 
         # load existing features
-        tsne_npz = np.load('tsne_feats.npz')
+        tsne_npz = np.load(feats_npz)
         self.tsne_features = tsne_npz['feats']
         self.tsne_labels = tsne_npz['labels']
         # add an extra label for this image (we want a it a different color)

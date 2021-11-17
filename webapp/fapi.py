@@ -18,7 +18,8 @@ from tensorflow.keras.models import Model
 from grad_cam import GradCam
 from tsne import TSNE
 
-IMG_SIZE = (256, 256, 3)
+IMG_SIZE_FSL = (256, 256, 3)
+IMG_SIZE_SSL = (224, 224, 3)
 
 img_fnames = {
     '0': "BACTERIA-7422-0001.jpeg",
@@ -55,7 +56,7 @@ async def form(request: Request, file: UploadFile = File(...)):
 
 def gen_heatmaps(batch_t, img):
     superimp_ssl = gc_ssl.gen_color_heatmap(batch_t, img, 0)  # SSL Model
-    superimp_fsl = gc_fsl.gen_grayscale_heatmap(batch_t, img, 0)  # FSL Model
+    superimp_fsl = gc_fsl.gen_color_heatmap(batch_t, img, 0)  # FSL Model
     tf.io.write_file('static/saliency2.jpeg', tf.io.encode_jpeg(superimp_ssl))
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
 
@@ -66,8 +67,10 @@ def img_predict(img_fname, request):
         img = np.stack([img] * 3, axis=-1)
 
     batch = np.expand_dims(img, axis=0)
-    batch_t = img_preprocess(batch)
-    pred = model_fsl.predict(batch_t)
+    # batch_t = img_preprocess_fsl(batch)  # FSL Model
+    # pred = model_fsl.predict(batch_t)    # FSL Model
+    batch_t = img_preprocess_ssl(batch)  # SSL Model
+    pred = tf.nn.softmax(model_ssl.predict(batch_t)).numpy()  # SSL Model
     pred_prob = f'{pred[0][0]:.3f}'
     print(f'{img_fname} ==> {pred_prob}')
 
@@ -85,8 +88,15 @@ def img_predict(img_fname, request):
                                        })
 
 
-def img_preprocess(imgs):
-    imgs = tf.image.resize(imgs, IMG_SIZE[:2], method='bilinear')
+def img_preprocess_fsl(imgs):
+    imgs = tf.image.resize(imgs, IMG_SIZE_FSL[:2], method='bicubic')
+    return imgs
+
+
+def img_preprocess_ssl(imgs):
+    imgs = tf.image.convert_image_dtype(imgs, dtype=tf.float32)
+    imgs = tf.image.resize(imgs, IMG_SIZE_SSL[:2], method='bicubic')
+    imgs = tf.clip_by_value(imgs, 0.0, 1.0)
     return imgs
 
 
@@ -116,19 +126,26 @@ def make_model(input_shape):
 
 
 def main():
-    # fully supervised model
+    # fully-supervised model
     global model_fsl
-    model_fsl = make_model(IMG_SIZE)
-    model_fsl.build(IMG_SIZE)
+    model_fsl = make_model(IMG_SIZE_FSL)
+    model_fsl.build(IMG_SIZE_FSL)
     model_fsl.load_weights('FSL_ResNet50_XrayReborn.h5')
     model_fsl.trainable = False
 
+    # semi-supervised model
+    global model_ssl
+    model_ssl = tf.keras.models.load_model('model_ssl')
+    model_ssl.build(IMG_SIZE_SSL)
+    model_ssl.trainable = False
+
     global tsne
-    tsne = TSNE(model_fsl, 'dense')
+    # tsne = TSNE(model_fsl, 'dense', 'tsne_feats_fsl.npz')  # FSL
+    tsne = TSNE(model_fsl, 'dense', 'tsne_feats_ssl.npz')  # SSL
 
     global gc_fsl, gc_ssl
     gc_fsl = GradCam(model_fsl, 'lambda_1', 'jet_colors.npy')  # FSL
-    gc_ssl = GradCam(model_fsl, 'lambda_1', 'jet_colors.npy')  # SSL
+    gc_ssl = GradCam(model_ssl, 'conv5_block3_out', 'jet_colors.npy')  # SSL
 
 
 if __name__ == '__main__':
