@@ -60,10 +60,16 @@ def update_finetune_metrics_train(supervised_loss_metric, supervised_acc_metric,
 
 
 def update_finetune_metrics_eval(label_top_1_accuracy_metrics,
-                                 label_top_5_accuracy_metrics, outputs, labels):
+                                 label_top_5_accuracy_metrics, 
+                                 label_recall,
+                                 label_precision,
+                                 outputs, labels):
   label_top_1_accuracy_metrics.update_state(
       tf.argmax(labels, 1), tf.argmax(outputs, axis=1))
   label_top_5_accuracy_metrics.update_state(labels, outputs)
+  label_recall.update_state(tf.argmax(labels, 1), tf.argmax(outputs, axis=1))
+  label_precision.update_state(tf.argmax(labels, 1), tf.argmax(outputs, axis=1))
+
 
 
 def _float_metric_value(metric):
