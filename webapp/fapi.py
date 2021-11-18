@@ -38,6 +38,14 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 async def read_item(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get('/about.html', response_class=HTMLResponse)
+async def read_item(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+
+@app.get('/team.html', response_class=HTMLResponse)
+async def read_item(request: Request):
+    return templates.TemplateResponse("team.html", {"request": request})
+
 
 @app.get('/diagnose/{idx}', response_class=HTMLResponse)
 async def read_item(request: Request, idx: str):
@@ -55,7 +63,7 @@ async def form(request: Request, file: UploadFile = File(...)):
 
 
 def gen_heatmap_fsl(batch_t, img):
-    superimp_fsl = gc_fsl.gen_grayscale_heatmap(batch_t, img, 0)  # FSL Model
+    superimp_fsl = gc_fsl.gen_color_heatmap(batch_t, img, 0)  # FSL Model
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
 
 

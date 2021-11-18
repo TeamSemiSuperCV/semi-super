@@ -23,24 +23,9 @@
     <!-- Showcase -->
     <section class="bg-dark text-light p-5 p-lg-0 pt-lg-5 text-center text-sm-start">
         <div class="container">
-            <div class="row pt-5" style="height: 465px;">
-                <div class="col-6">
-                    <img src="{{ url_for('static', path=f_example) }}" , height="390">
-                    <h4 class="text-warning mt-1 ml-4">{{ prediction }}</h4>
-                </div>
-                <div class="col-6">
-                    <img src="{{ url_for('static', path=f_saliency2) }}" , height="390">
-                    <h4 class="text-danger mt-1 ml-4">SSL Saliency Map</h4>
-                </div>
-            </div>
-            <div class="row pt-4" style="height: 465px;">
-                <div class="col-6">
-                    <img src="{{ url_for('static', path=f_tsne) }}" , height="390">
-                    <h4 class="text-info mt-1 ml-4">t-SNE Clustering</h4>
-                </div>
-                <div class="col-6">
-                    <img src="{{ url_for('static', path=f_saliency1) }}" , height="390">
-                    <h4 class="text-danger mt-1 ml-4">FSL Saliency Map</h4>
+            <div class="row pt-5" style="height: 630px;">
+                <div class="col-12">
+                    <img src="/static/team.jpeg" , height="500">
                 </div>
             </div>
         </div>
@@ -55,18 +40,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
-
-    <script>
-        var idx = window.location.href.match('=(.+)$')[1]
-        var img_src
-        switch (idx) {
-            case '0': img_src = "/static/BACTERIA-7422-0001.jpeg"; break;
-            case '1': img_src = "/static/BACTERIA-30629-0001.jpeg"; break;
-            case '2': img_src = "/static/NORMAL-28501-0001.jpeg"; break;
-            case '3': img_src = "/static/NORMAL-32326-0001.jpeg"; break;
-        }
-        document.getElementById('example').src = img_src
-    </script>
 
 </body>
 
