@@ -38,9 +38,11 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 async def read_item(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 @app.get('/about.html', response_class=HTMLResponse)
 async def read_item(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
+
 
 @app.get('/team.html', response_class=HTMLResponse)
 async def read_item(request: Request):
@@ -63,13 +65,23 @@ async def form(request: Request, file: UploadFile = File(...)):
 
 
 def gen_heatmap_fsl(batch_t, img):
-    superimp_fsl = gc_fsl.gen_color_heatmap(batch_t, img, 0)  # FSL Model
+    superimp_fsl = gc_fsl.gen_grayscale_heatmap(batch_t, img, 0)  # FSL Model
     tf.io.write_file('static/saliency1.jpeg', tf.io.encode_jpeg(superimp_fsl))
 
 
 def gen_heatmap_ssl(batch_t, img):
-    superimp_ssl = gc_ssl.gen_color_heatmap(batch_t, img, 1)  # SSL Model
+    superimp_ssl = gc_ssl.gen_grayscale_heatmap(batch_t, img, 1)  # SSL Model
     tf.io.write_file('static/saliency2.jpeg', tf.io.encode_jpeg(superimp_ssl))
+
+
+def pred_to_diag_prob(pred_pneumonia):
+    if pred_pneumonia > 0.5:
+        diagnosis = 'PNEUMONIA'
+        probability = f'{pred_pneumonia * 100:.0f}'
+    else:
+        diagnosis = 'NORMAL'
+        probability = f'{(1 - pred_pneumonia) * 100:.0f}'
+    return (diagnosis, probability)
 
 
 def img_predict(img_fname, request):
@@ -78,20 +90,16 @@ def img_predict(img_fname, request):
         img = np.stack([img] * 3, axis=-1)
 
     batch = np.expand_dims(img, axis=0)
-    batch_t_fsl = img_preprocess_fsl(batch)  # FSL Model
-    batch_t_ssl = img_preprocess_ssl(batch)  # SSL Model
-    # pred = model_fsl.predict(batch_t)    # FSL Model
-    pred = tf.nn.softmax(model_ssl.predict(batch_t_ssl)).numpy()  # SSL Model
-    if pred[0][1] > 0.5:
-        diagnosis = 'PNEUMONIA'
-        pred_prob = f'{pred[0][1] * 100:.0f}%'  # SSL Model
-        # pred_prob = f'{pred[0][0] * 100:.0f}'  # FSL Model
-    else:
-        diagnosis = 'NORMAL'
-        pred_prob = f'{pred[0][0] * 100:.0f}%'  # SSL Model
-        # pred_prob = f'{(1 - pred[0][0]) * 100:.0f}'  # FSL Model
-    prediction = f'P( {diagnosis} ) = {pred_prob}'
-    print(f'{img_fname} ==> {pred_prob}')
+    batch_t_fsl = img_preprocess_fsl(batch)     # FSL Model
+    batch_t_ssl = img_preprocess_ssl(batch)     # SSL Model
+    pred_fsl = model_fsl.predict(batch_t_fsl)   # FSL Model
+    pred_ssl = tf.nn.softmax(model_ssl.predict(
+        batch_t_ssl)).numpy()  # SSL Model
+    diag_fsl, prob_fsl = pred_to_diag_prob(pred_fsl[0][0])
+    diag_ssl, prob_ssl = pred_to_diag_prob(pred_ssl[0][1])
+    prediction_fsl = f'FSL: {diag_fsl} @ {prob_fsl}%'
+    prediction_ssl = f'SSL: {diag_ssl} @ {prob_ssl}%'
+    print(f'{img_fname} ==> SSL:{prediction_ssl} FSL:{prediction_fsl}')
 
     gen_heatmap_fsl(batch_t_fsl, img)
     gen_heatmap_ssl(batch_t_ssl, img)
@@ -101,7 +109,8 @@ def img_predict(img_fname, request):
     rand_refresh = str(int(time() % 8192))
     return templates.TemplateResponse("diagnose.html",
                                       {"request": request,
-                                       "prediction": prediction,
+                                       "prediction_fsl": prediction_fsl,
+                                       "prediction_ssl": prediction_ssl,
                                        "f_example": f'{img_fname}?{rand_refresh}',
                                        "f_tsne": f'tsne.png?{rand_refresh}',
                                        "f_saliency1": f'saliency1.jpeg?{rand_refresh}',

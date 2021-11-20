@@ -26,21 +26,24 @@
             <div class="row pt-5" style="height: 465px;">
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_example) }}" , height="390">
-                    <h4 class="text-warning mt-1 ml-4">{{ prediction }}</h4>
+                    <div class="mt-1">
+                        <h5 style="display: inline;" class="text-warning">{{ prediction_ssl }}</h5> &nbsp; &nbsp;
+                        <h5 style="display: inline;" class="text-primary">{{ prediction_fsl }}</h5>
+                    </div>
                 </div>
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_saliency2) }}" , height="390">
-                    <h4 class="text-danger mt-1 ml-4">SSL Saliency Map</h4>
+                    <h5 class="text-danger mt-1">SSL Saliency Map</h5>
                 </div>
             </div>
             <div class="row pt-4" style="height: 465px;">
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_tsne) }}" , height="390">
-                    <h4 class="text-info mt-1 ml-4">t-SNE Clustering</h4>
+                    <h5 class="text-info mt-1">t-SNE Clustering</h5>
                 </div>
                 <div class="col-6">
                     <img src="{{ url_for('static', path=f_saliency1) }}" , height="390">
-                    <h4 class="text-danger mt-1 ml-4">FSL Saliency Map</h4>
+                    <h5 class="text-danger mt-1">FSL Saliency Map</h5>
                 </div>
             </div>
         </div>
