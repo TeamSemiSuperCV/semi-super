@@ -277,8 +277,21 @@ flags.DEFINE_boolean(
     'Include rotation in data augmentation.')
 
 flags.DEFINE_boolean(
+    'distill_mode', False,
+    'Activate distillation mode.')
+
+flags.DEFINE_string(
+    'teacher_model_dir', None,
+    'Load the given teacher model for distillation mode.')
+
+flags.DEFINE_boolean(
+    'keras_resnet50', False,
+    'Use Keras ResNet50 as student model.')
+
+flags.DEFINE_boolean(
     'vertical_flip', False,
     'Include vertical_flip in data augmentation.')
+
 
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
@@ -329,12 +342,19 @@ def build_saved_model(model, include_projection_head=True):
 
 def save(model, global_step):
   """Export as SavedModel for finetuning and inference."""
-  saved_model = build_saved_model(model)
-  export_dir = os.path.join(FLAGS.model_dir, 'saved_model')
-  checkpoint_export_dir = os.path.join(export_dir, str(global_step))
-  if tf.io.gfile.exists(checkpoint_export_dir):
-    tf.io.gfile.rmtree(checkpoint_export_dir)
-  tf.saved_model.save(saved_model, checkpoint_export_dir)
+  if FLAGS.distill_mode and FLAGS.keras_resnet50:
+    export_dir = os.path.join(FLAGS.model_dir, 'saved_model_keras')
+    checkpoint_export_dir = os.path.join(export_dir, str(global_step))
+    if tf.io.gfile.exists(checkpoint_export_dir):
+      tf.io.gfile.rmtree(checkpoint_export_dir)
+    tf.keras.models.save_model(model, checkpoint_export_dir)
+  else:
+    saved_model = build_saved_model(model)
+    export_dir = os.path.join(FLAGS.model_dir, 'saved_model')
+    checkpoint_export_dir = os.path.join(export_dir, str(global_step))
+    if tf.io.gfile.exists(checkpoint_export_dir):
+      tf.io.gfile.rmtree(checkpoint_export_dir)
+    tf.saved_model.save(saved_model, checkpoint_export_dir)
 
   if FLAGS.keep_hub_module_max > 0:
     # Delete old exported SavedModels.
@@ -381,7 +401,7 @@ def try_restore_from_checkpoint(model, global_step, optimizer):
     # Restore model weights, global step, optimizer states
     logging.info('Restoring from latest checkpoint: %s', latest_ckpt)
     checkpoint_manager.checkpoint.restore(latest_ckpt).expect_partial()
-  elif FLAGS.checkpoint:
+  elif FLAGS.checkpoint and FLAGS.keras_resnet50 == False:
     # Restore model weights only, but not global step and optimizer states
     logging.info('Restoring from given checkpoint: %s', FLAGS.checkpoint)
     checkpoint_manager2 = tf.train.CheckpointManager(
@@ -426,8 +446,13 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
         'eval/label_top_1_accuracy')
     label_top_5_accuracy = tf.keras.metrics.TopKCategoricalAccuracy(
         5, 'eval/label_top_5_accuracy')
+    label_recall = tf.keras.metrics.Recall(name='eval/recall')
+    label_precision = tf.keras.metrics.Precision(name='eval/precision')
     all_metrics = [
-        regularization_loss, eval_sup_loss_metric, label_top_1_accuracy, label_top_5_accuracy
+        regularization_loss, eval_sup_loss_metric, label_top_1_accuracy, 
+        label_top_5_accuracy,
+        label_recall,
+        label_precision
     ]
 
     # Restore checkpoint.
@@ -439,13 +464,24 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
     logging.info('Performing eval at step %d', global_step.numpy())
 
   def single_step(features, labels):
-    _, supervised_head_outputs = model(features, training=False)
+    if FLAGS.distill_mode and FLAGS.keras_resnet50:
+      _, supervised_head_outputs = None, model(features, training=False)
+    else:
+      _, supervised_head_outputs = model(features, training=False)
     assert supervised_head_outputs is not None
     outputs = supervised_head_outputs
     l = labels['labels']
     metrics.update_finetune_metrics_eval(label_top_1_accuracy,
-                                         label_top_5_accuracy, outputs, l)
-    reg_loss = model_lib.add_weight_decay(model, adjust_per_optimizer=True)
+                                         label_top_5_accuracy, 
+                                         label_recall,
+                                         label_precision,
+                                         outputs, l)
+    if FLAGS.distill_mode and FLAGS.keras_resnet50:
+      reg_loss = model_lib.add_weight_decay_keras(
+          model, adjust_per_optimizer=True)
+    else:
+      reg_loss = model_lib.add_weight_decay(
+          model, adjust_per_optimizer=True)
     regularization_loss.update_state(reg_loss)
     eval_sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
     eval_sup_loss_metric.update_state(eval_sup_loss)
@@ -622,7 +658,18 @@ def main(argv):
                  strategy.num_replicas_in_sync)
 
   with strategy.scope():
-    model = model_lib.Model(num_classes)
+    if FLAGS.distill_mode and FLAGS.keras_resnet50:
+      input_shape = (FLAGS.image_size, FLAGS.image_size, 3)
+      # model = tf.keras.applications.ResNet50(weights=None,
+      #     input_shape=input_shape, classes=num_classes, classifier_activation=None)
+      model = model_lib.resnet50_mod(input_shape, num_classes)
+      logging.info('Loaded Keras ResNet50 as student model')
+    else:
+      model = model_lib.Model(num_classes)
+    if FLAGS.distill_mode:
+      logging.info('Distillation mode active')
+      logging.info('Restoring teacher model from: %s', FLAGS.teacher_model_dir)
+      teacher_model = tf.saved_model.load(FLAGS.teacher_model_dir)
 
   if FLAGS.mode == 'eval':
     for ckpt in tf.train.checkpoints_iterator(
@@ -688,8 +735,19 @@ def main(argv):
           # Only log augmented images for the first tower.
           tf.summary.image(
               'image', features[:, :, :, :3], step=optimizer.iterations + 1)
-        projection_head_outputs, supervised_head_outputs = model(
-            features, training=True)
+        if FLAGS.distill_mode and FLAGS.keras_resnet50:
+          projection_head_outputs, supervised_head_outputs = None, model(
+              features, training=True)
+        else:
+          projection_head_outputs, supervised_head_outputs = model(
+              features, training=True)
+        
+        if FLAGS.distill_mode:
+          teacher_outputs = teacher_model(
+              features, trainable=False)['logits_sup']
+        else:
+          teacher_outputs = None
+
         loss = None
         if projection_head_outputs is not None:
           outputs = projection_head_outputs
@@ -712,16 +770,29 @@ def main(argv):
           l = labels['labels']
           if FLAGS.train_mode == 'pretrain' and FLAGS.lineareval_while_pretraining:
             l = tf.concat([l, l], 0)
-          sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
+          if FLAGS.distill_mode:
+            sup_loss = obj_lib.add_kd_loss(teacher_logits=teacher_outputs, 
+                student_logits=outputs, temperature=FLAGS.temperature)
+          else:
+            sup_loss = obj_lib.add_supervised_loss(labels=l, logits=outputs)
           if loss is None:
             loss = sup_loss
           else:
             loss += sup_loss
-          metrics.update_finetune_metrics_train(supervised_loss_metric,
+          if FLAGS.distill_mode:
+            metrics.update_finetune_metrics_train(supervised_loss_metric,
+                                                supervised_acc_metric, sup_loss,
+                                                teacher_outputs, outputs)
+          else:
+            metrics.update_finetune_metrics_train(supervised_loss_metric,
                                                 supervised_acc_metric, sup_loss,
                                                 l, outputs)
-        weight_decay = model_lib.add_weight_decay(
-            model, adjust_per_optimizer=True)
+        if FLAGS.distill_mode and FLAGS.keras_resnet50:
+          weight_decay = model_lib.add_weight_decay_keras(
+              model, adjust_per_optimizer=True)
+        else:
+          weight_decay = model_lib.add_weight_decay(
+              model, adjust_per_optimizer=True)
         weight_decay_metric.update_state(weight_decay)
         loss += weight_decay
         total_loss_metric.update_state(loss)

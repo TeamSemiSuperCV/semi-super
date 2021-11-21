@@ -44,6 +44,24 @@ def build_optimizer(learning_rate):
     raise ValueError('Unknown optimizer {}'.format(FLAGS.optimizer))
 
 
+def build_optimizer_keras(learning_rate):
+  """Returns the optimizer."""
+  if FLAGS.optimizer == 'momentum':
+    return tf.keras.optimizers.SGD(learning_rate, FLAGS.momentum, nesterov=True)
+  elif FLAGS.optimizer == 'adam':
+    return tf.keras.optimizers.Adam(learning_rate)
+  elif FLAGS.optimizer == 'lars':
+    return lars_optimizer.LARSOptimizer(
+        learning_rate,
+        momentum=FLAGS.momentum,
+        weight_decay=FLAGS.weight_decay,
+        exclude_from_weight_decay=[
+            'bn', 'batch_normalization', 'bias', 'dense'
+        ])
+  else:
+    raise ValueError('Unknown optimizer {}'.format(FLAGS.optimizer))
+
+
 def add_weight_decay(model, adjust_per_optimizer=True):
   """Compute weight decay from flags."""
   if adjust_per_optimizer and 'lars' in FLAGS.optimizer:
@@ -53,6 +71,31 @@ def add_weight_decay(model, adjust_per_optimizer=True):
         tf.nn.l2_loss(v)
         for v in model.trainable_variables
         if 'head_supervised' in v.name and 'bias' not in v.name
+    ]
+    if l2_losses:
+      return FLAGS.weight_decay * tf.add_n(l2_losses)
+    else:
+      return 0
+
+  # TODO(srbs): Think of a way to avoid name-based filtering here.
+  l2_losses = [
+      tf.nn.l2_loss(v)
+      for v in model.trainable_weights
+      if 'batch_normalization' not in v.name
+  ]
+  loss = FLAGS.weight_decay * tf.add_n(l2_losses)
+  return loss
+
+
+def add_weight_decay_keras(model, adjust_per_optimizer=True):
+  """Compute weight decay from flags."""
+  if adjust_per_optimizer and 'lars' in FLAGS.optimizer:
+    # Weight decay are taking care of by optimizer for these cases.
+    # Except for supervised head, which will be added here.
+    l2_losses = [
+        tf.nn.l2_loss(v)
+        for v in model.trainable_variables
+        if 'dense' in v.name and 'bias' not in v.name
     ]
     if l2_losses:
       return FLAGS.weight_decay * tf.add_n(l2_losses)
@@ -280,3 +323,45 @@ class Model(tf.keras.models.Model):
       return projection_head_outputs, supervised_head_outputs
     else:
       return projection_head_outputs, None
+
+
+# def resnet50_mod(input_shape, num_classes):
+#     initializer = 'glorot_normal'
+    
+#     base_model = tf.keras.applications.ResNet50(include_top=False, pooling='max', weights=None,
+#                           input_shape=input_shape)
+#     base_model.trainable = True
+
+#     inputs = tf.keras.layers.Input(shape=input_shape)
+#     x = base_model(inputs)
+#     x = tf.keras.layers.Dropout(0.4)(x)
+#     x = tf.keras.layers.BatchNormalization()(x)
+#     x = tf.keras.layers.Dense(64, activation='relu', kernel_initializer=initializer)(x)
+#     x = tf.keras.layers.Dropout(0.4)(x)
+#     x = tf.keras.layers.BatchNormalization()(x)
+#     outputs = tf.keras.layers.Dense(num_classes, kernel_initializer=initializer)(x)
+    
+#     model = tf.keras.models.Model(inputs=inputs, outputs=outputs)
+#     return model
+
+def resnet50_mod(input_shape, num_classes):
+    initializer = 'glorot_normal'
+    
+    base_model = tf.keras.applications.ResNet50(include_top=False, pooling=None, weights=None,
+                          input_shape=input_shape)
+    base_model.trainable = True
+
+    # inputs = tf.keras.layers.Input(shape=input_shape)
+    # x = base_model(inputs)
+    # x = tf.keras.layers.Lambda(lambda x: x, name='lambda_1')(x)
+    x = base_model.output
+    x = tf.keras.layers.GlobalMaxPooling2D()(x)
+    x = tf.keras.layers.Dropout(0.4)(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    x = tf.keras.layers.Dense(64, activation='relu', kernel_initializer=initializer)(x)
+    x = tf.keras.layers.Dropout(0.4)(x)
+    x = tf.keras.layers.BatchNormalization()(x)
+    outputs = tf.keras.layers.Dense(num_classes, kernel_initializer=initializer)(x)
+    
+    model = tf.keras.models.Model(inputs=base_model.input, outputs=outputs)
+    return model
