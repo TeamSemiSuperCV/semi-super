@@ -471,6 +471,8 @@ def preprocess_for_train(image,
     image = random_crop_with_resize(image, height, width)
   if flip:
     image = tf.image.random_flip_left_right(image)
+  if FLAGS.vertical_flip:
+    image = tf.image.random_flip_up_down(image)
   if color_distort:
     image = random_color_jitter(image, strength=FLAGS.color_jitter_strength,
                                 impl=impl)

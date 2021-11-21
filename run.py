@@ -288,6 +288,11 @@ flags.DEFINE_boolean(
     'keras_resnet50', False,
     'Use Keras ResNet50 as student model.')
 
+flags.DEFINE_boolean(
+    'vertical_flip', False,
+    'Include vertical_flip in data augmentation.')
+
+
 def get_salient_tensors_dict(include_projection_head):
   """Returns a dictionary of tensors."""
   graph = tf.compat.v1.get_default_graph()
@@ -505,14 +510,14 @@ def perform_evaluation(model, builder, eval_steps, ckpt, strategy, topology, tra
 
   # Record results as JSON.
   if FLAGS.mode == 'eval':
-    result_json_path = os.path.join(FLAGS.model_dir, 'result_eval.json')
+    result_json_path = os.path.join(FLAGS.model_dir, 'result_{}.json'.format(FLAGS.eval_split))
     result = {metric.name: metric.result().numpy() for metric in all_metrics}
     result['global_step'] = global_step.numpy()
     logging.info(result)
     with tf.io.gfile.GFile(result_json_path, 'w') as f:
       json.dump({k: float(v) for k, v in result.items()}, f)
   else:
-    result_json_path = os.path.join(FLAGS.model_dir, 'result.json')
+    result_json_path = os.path.join(FLAGS.model_dir, 'result_{}.json'.format(FLAGS.eval_split))
     result = {metric.name: metric.result().numpy() for metric in all_metrics}
     result['global_step'] = global_step.numpy()
     logging.info(result)

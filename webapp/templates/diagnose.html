@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>TeamSemiSuperCV - SemiSuperCV</title>
+    <link rel="icon" type="image/svg" href="/static/favicon.svg" />
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 fixed-top">
+        <div class="container">
+            <a href="#" class="navbar-brand"><span class="h4 text-warning">SemiSuperCV</span> &nbsp; : &nbsp;
+                Pediatric Pneumonia Diagnosis via Semi-Supervised Learning</a>
+        </div>
+    </nav>
+
+    <!-- Showcase -->
+    <section class="bg-dark text-light p-5 p-lg-0 pt-lg-5 text-center text-sm-start">
+        <div class="container">
+            <div class="row pt-5" style="height: 465px;">
+                <div class="col-6">
+                    <img src="{{ url_for('static', path=f_example) }}" , height="390">
+                    <div class="mt-1">
+                        <h5 style="display: inline;" class="text-warning">{{ prediction_ssl }}</h5> &nbsp; &nbsp;
+                        <h5 style="display: inline;" class="text-primary">{{ prediction_fsl }}</h5>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <img src="{{ url_for('static', path=f_saliency2) }}" , height="390">
+                    <h5 class="text-danger mt-1">SSL Saliency Map</h5>
+                </div>
+            </div>
+            <div class="row pt-4" style="height: 465px;">
+                <div class="col-6">
+                    <img src="{{ url_for('static', path=f_tsne) }}" , height="390">
+                    <h5 class="text-info mt-1">t-SNE Clustering</h5>
+                </div>
+                <div class="col-6">
+                    <img src="{{ url_for('static', path=f_saliency1) }}" , height="390">
+                    <h5 class="text-danger mt-1">FSL Saliency Map</h5>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        var idx = window.location.href.match('=(.+)$')[1]
+        var img_src
+        switch (idx) {
+            case '0': img_src = "/static/BACTERIA-7422-0001.jpeg"; break;
+            case '1': img_src = "/static/BACTERIA-30629-0001.jpeg"; break;
+            case '2': img_src = "/static/NORMAL-28501-0001.jpeg"; break;
+            case '3': img_src = "/static/NORMAL-32326-0001.jpeg"; break;
+        }
+        document.getElementById('example').src = img_src
+    </script>
+
+</body>
+
+</html>
