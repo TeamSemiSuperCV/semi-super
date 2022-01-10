@@ -10,4 +10,4 @@ Resources
 
 ## ML workflow
 
-![ML workflow](Workflow.png)
+![ML workflow](Workflow.png | width=100)
