@@ -10,4 +10,4 @@ Resources
 
 ## ML workflow
 
-![ML workflow](Workflow.png)
+<img src="Workflow.png" width=50% height=50%>
