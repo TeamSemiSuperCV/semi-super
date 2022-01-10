@@ -10,4 +10,4 @@ Resources
 
 ## ML workflow
 
-<img src="Workflow.png" width=50% height=50%>
+<img src="Workflow.png" width=75% height=75%>
