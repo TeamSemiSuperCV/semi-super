@@ -7,3 +7,7 @@ Resources
 
 - [SimCLRv2](https://arxiv.org/abs/2006.10029)
 - [Chest X-ray Dataset](https://data.mendeley.com/datasets/rscbjbr9sj/2?__hstc=25856994.691713ea611804e2a755290a622023a7.1641825897692.1641825897692.1641825897692.1&__hssc=25856994.1.1641825897692&__hsfp=1000557398)
+
+## ML workflow
+
+![ML workflow](Workflow.png)
