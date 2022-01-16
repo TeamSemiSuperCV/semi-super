@@ -3,7 +3,7 @@
 ## About
 Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize Semi/Self-Supervised Learning to significantly reduce the need for fully labelled data. In this repo you will find the source code, along with training notebooks, and the final TensorFlow 2 saved model used to create the web application for detecting Pediatric Pneumonia from chest X-rays.
 
-The Semi-supervised learning framework used in the project comprises of three steps as shown in the workflow diagram below: 
+The semi-supervised learning framework used in the project comprises of three steps as shown in the workflow diagram below: 
 
 1. Unsupervised or self-supervised pretraining
 2. Supervised fine-tuning
