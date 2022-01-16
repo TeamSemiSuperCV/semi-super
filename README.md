@@ -5,9 +5,11 @@ Fully supervised approaches need large, densely annotated datasets. Only hospita
 
 The Semi-supervised learning framework used in the project comprises of three steps as shown in the workflow diagram below: 
 
-Markup : 1. Unsupervised or self-supervised pretraining
-         2. Supervised fine-tuning
-         3. Knowledge distillation using unlabeled data
+1. Unsupervised or self-supervised pretraining
+2. Supervised fine-tuning
+3. Knowledge distillation using unlabeled data
+
+Refer to [SimCLRv2](https://arxiv.org/abs/2006.10029) - Big Self-Supervised Models are Strong Semi-Supervised Learners paper for more details regarding the framework.
 
 Resources
 
