@@ -22,4 +22,4 @@ Resources
 
 ## Acknowledgements
 
-The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project. We have added knowledge distillation feature to the base code along with several other changes. With these changes, now knowledge distillation can be performed on Google Cloud TPU saving significant computational time. 
+The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project. We have added knowledge distillation feature along with several other changes. With these changes, knowledge distillation can now be performed on Google Cloud TPU saving significant computational time. 
