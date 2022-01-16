@@ -38,13 +38,19 @@ Navigate to the webapp directory of the repo.
 cd semi-super/webapp
 ```
 
-Boot up the service with `docker-compose`
+Now build the container image using the `docker build` command. It will take few minutes.
+
 ```bash
-docker-compose up --build
+docker build -t semi-super .
 ```
 
-You should now be able to access the `SemiSuperCV` at `localhost:8080`.
+Start your container using the docker run command and specify the name of the image we just created:
 
+```bash
+docker run -dp 8080:8080 semi-super
+```
+
+After a few seconds, open your web browser to http://localhost:8080. You should see our app.
 
 ## Acknowledgements
 
