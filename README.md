@@ -9,7 +9,7 @@ The semi-supervised learning framework used in the project comprises of three st
 2. Supervised fine-tuning
 3. Knowledge distillation using unlabeled data
 
-Refer to SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners [paper](https://arxiv.org/abs/2006.10029) for more details regarding the framework. The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project.
+Refer to SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners [paper](https://arxiv.org/abs/2006.10029) for more details regarding the framework.
 
 Resources
 
@@ -21,4 +21,5 @@ Resources
 
 ## Acknowledgements
 
-- [SimCLRv2](https://arxiv.org/abs/2006.10029)
+- The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project.
+  - We have added knowledge distillation feature to the base code along with other changes. With this now knowledge distillation can be performed on Google Cloud TPU saving significant computational time. 
