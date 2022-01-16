@@ -1,15 +1,15 @@
 # Semi/Self-Supervised Learning on a Pediatric Pneumonia Dataset
 
 ## About
-Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize Semi/Self-Supervised Learning to significantly reduce the need for fully labelled data. In this repo you will find the source code, along with training notebooks, and the final TensorFlow 2 saved model used to create the web application for detecting Pediatric Pneumonia from chest X-rays.
+Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize semi/self-supervised learning approaches to significantly reduce the need for fully labelled data. In this repo you will find the source code, along with training notebooks, and the final TensorFlow 2 saved model used to develop the web application for detecting Pediatric Pneumonia from chest X-rays.
 
-The semi-supervised learning framework used in the project comprises of three steps as shown in the workflow diagram below: 
+The semi-supervised learning framework used in the project comprises of three stages: 
 
 1. Unsupervised or self-supervised pretraining
 2. Supervised fine-tuning
 3. Knowledge distillation using unlabeled data
 
-Refer to [SimCLRv2](https://arxiv.org/abs/2006.10029) - Big Self-Supervised Models are Strong Semi-Supervised Learners paper for more details regarding the framework. The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of the project.
+Refer to [SimCLRv2](https://arxiv.org/abs/2006.10029) - Big Self-Supervised Models are Strong Semi-Supervised Learners [paper](https://arxiv.org/abs/2006.10029) for more details regarding the framework. The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project.
 
 Resources
 
