@@ -9,7 +9,7 @@ The semi-supervised learning framework used in the project comprises of three st
 2. Supervised fine-tuning
 3. Knowledge distillation using unlabeled data
 
-Refer to SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners [paper](https://arxiv.org/abs/2006.10029) for more details regarding the framework.
+Refer to SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners [paper](https://arxiv.org/abs/2006.10029) for more details regarding the framework used.
 
 Resources
 
