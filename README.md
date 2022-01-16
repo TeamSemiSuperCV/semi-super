@@ -24,7 +24,7 @@ Resources
 
 ![Demo](SemiSuperCV.gif)
 
-Run the app locally with Docker.
+Follow the instructions below to run the app locally with Docker.
 
 Once you have Docker installed, clone this repo 
 
@@ -32,7 +32,7 @@ Once you have Docker installed, clone this repo
 git clone https://github.com/TeamSemiSuperCV/semi-super
 ```
 
-Navigate to the webapp directory of the repo if you haven't done so already.
+Navigate to the webapp directory of the repo.
 
 ```bash
 cd semi-super/webapp
