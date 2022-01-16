@@ -24,6 +24,28 @@ Resources
 
 ![Demo](SemiSuperCV.gif)
 
+Run the app locally with Docker.
+
+Once you have Docker installed, clone this repo 
+
+```bash
+git clone https://github.com/TeamSemiSuperCV/semi-super
+```
+
+Navigate to the webapp directory of the repo if you haven't done so already.
+
+```bash
+cd semi-super/webapp
+```
+
+Boot up the service with `docker-compose`
+```bash
+docker-compose up --build
+```
+
+You should now be able to access the `SemiSuperCV` at `localhost:8080`.
+
+
 ## Acknowledgements
 
 The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project. We have added knowledge distillation feature along with several other changes. With these changes, knowledge distillation can now be performed on Google Cloud TPU saving significant computational time. 
