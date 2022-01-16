@@ -9,11 +9,12 @@ The semi-supervised learning framework used in the project comprises of three st
 2. Supervised fine-tuning
 3. Knowledge distillation using unlabeled data
 
-Refer to SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners [paper](https://arxiv.org/abs/2006.10029) for more details regarding the framework used.
+Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
 Resources
 
 - [Chest X-ray Dataset](https://data.mendeley.com/datasets/rscbjbr9sj/2?__hstc=25856994.691713ea611804e2a755290a622023a7.1641825897692.1641825897692.1641825897692.1&__hssc=25856994.1.1641825897692&__hsfp=1000557398)
+- [SimCLRv2 paper](https://arxiv.org/abs/2006.10029)
 
 ## ML workflow
 
