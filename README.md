@@ -56,6 +56,14 @@ After a few seconds, open your web browser to http://localhost:8080. You should 
 
 ## Findings  
 
+### Stage 1 Self-Supervised - Contrastive Accuracy
+
+| Labels | Stage 1 (self-supervised) |
+| ------- | ------ | 
+| No labels used | [99.99%]() |
+
+### Stage 2 and 3 vs Fully-supervised (FSL) Test Accuracy
+
 | Labels  | FSL    | Stage 2 (finetuning) | Stage 3 (distillation) | 
 | ------- | ------ | -------------------- | ---------------------- | 
 | 1% | [85.2%]() | [94.5%]() | [96.3%]() | 
