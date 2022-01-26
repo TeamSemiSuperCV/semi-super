@@ -18,11 +18,11 @@ Resources
 
 ## ML workflow
 
-<img src="Workflow.png" width=75% height=75%>
+<img src=".github\readme\Workflow.png" width=75% height=75%>
 
 ## App demo
 
-![Demo](SemiSuperCV.gif)
+![Demo](.github\readme\SemiSuperCV.gif)
 
 Follow the instructions below to run the app locally with Docker.
 
