@@ -22,7 +22,7 @@ Resources
 
 ## App demo
 
-![Demo](.github\readme\SemiSuperCV.gif)
+![Demo](\.github\readme\SemiSuperCV.gif)
 
 Follow the instructions below to run the app locally with Docker.
 
