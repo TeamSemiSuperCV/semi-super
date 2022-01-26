@@ -1,11 +1,11 @@
 # Semi/Self-Supervised Learning on a Pediatric Pneumonia Dataset
 
 ## About
-Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize semi/self-supervised learning approaches to significantly reduce the need for fully labelled data. In this repo you will find the source code, along with training notebooks, and the final TensorFlow 2 saved model used to develop the web application for detecting Pediatric Pneumonia from chest X-rays.
+Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize self-supervised and semi-supervised learning approaches to significantly reduce the need for fully labelled data. In this repo, you will find the project source code, along with training notebooks, and the final TensorFlow 2 saved model used to develop the web application for detecting Pediatric Pneumonia from chest X-rays.
 
-The semi-supervised learning framework used in the project comprises of three stages: 
+The semi/self-supervised learning framework used in the project comprises of three stages: 
 
-1. Unsupervised or self-supervised pretraining
+1. Self-supervised pretraining
 2. Supervised fine-tuning
 3. Knowledge distillation using unlabeled data
 
@@ -54,4 +54,4 @@ After a few seconds, open your web browser to http://localhost:8080. You should 
 
 ## Acknowledgements
 
-The base code is borrowed from [Google Research SimCLRv2](https://github.com/google-research/simclr) and has been heavily modified for the purpose of this project. We have added knowledge distillation feature along with several other changes. With these changes, knowledge distillation can now be performed on Google Cloud TPU saving significant computational time. 
+We have taken the SimCLR framework code [Google Research SimCLRv2](https://github.com/google-research/simclr) and have heavily modified it for the purpose of this project. We have added knowledge distillation feature along with several other changes. With these changes and improvements, now knowledge distillation can be performed on Google Cloud TPU cluster saving significant training duration time. 
