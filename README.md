@@ -11,6 +11,8 @@ The semi/self-supervised learning framework used in the project comprises of thr
 
 Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used. The project report and the final presentation slides can be found in the [docs](/docs) folder.
 
+The example notebooks for the Stage 1, 2, 3 training can be found in the [notebooks](/notebooks) folder.
+
 Resources
 
 - [Chest X-ray Dataset](https://data.mendeley.com/datasets/rscbjbr9sj/2?__hstc=25856994.691713ea611804e2a755290a622023a7.1641825897692.1641825897692.1641825897692.1&__hssc=25856994.1.1641825897692&__hsfp=1000557398)
@@ -51,6 +53,15 @@ docker run -dp 8080:8080 semi-super
 ```
 
 After a few seconds, open your web browser to http://localhost:8080. You should see our app.
+
+## Findings  
+
+| Labels  | FSL    | Stage 2 (finetuning) | Stage 3 (distillation) | 
+| ------- | ------ | -------------------- | ---------------------- | 
+| 1% | [85.2%]() | [94.5%]() | [96.3%]() | 
+| 2% | [87.2%]() | [96.8%]() | [97.6%]() | 
+| 5% | [86.0%]() | [97.1%]() | [98.1%]() | 
+| 100% | [98.9%]() |  |  | 
 
 ## Acknowledgements
 
