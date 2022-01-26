@@ -9,7 +9,7 @@ The semi/self-supervised learning framework used in the project comprises of thr
 2. Supervised fine-tuning
 3. Knowledge distillation using unlabeled data
 
-Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used. The project report and the final presentation slides can be found in the [docs](/docs) folder.
+Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
 The example notebooks for the Stage 1, 2, 3 training can be found in the [notebooks](/notebooks) folder.
 
@@ -56,6 +56,8 @@ After a few seconds, open your web browser to http://localhost:8080. You should 
 
 ## Findings  
 
+The project report and the final presentation slides can be found in the [docs](/docs) folder.
+ 
 ### Stage 1 - Contrastive Accuracy
 
 | Labels | Stage 1 (self-supervised) |
@@ -71,7 +73,7 @@ After a few seconds, open your web browser to http://localhost:8080. You should 
 | 5% | [86.0%]() | [97.1%]() | [98.1%]() | 
 | 100% | [98.9%]() |  |  | 
 
-[^1]: Fully-supervised model performance for comparison.
+[^1]: Fully-supervised model performance for benchmarking.
 
 ## Acknowledgements
 
