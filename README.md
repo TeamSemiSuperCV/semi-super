@@ -11,7 +11,7 @@ The semi/self-supervised learning framework used in the project comprises of thr
 
 Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
-The example notebooks for the Stage 1, 2, 3 training can be found in the [notebooks](/notebooks) folder.
+The example notebooks for the Stage 1, 2, 3 training can be found in the [notebooks](/notebooks) folder. The project report and the final presentation slides can be found in the [docs](/docs) folder.
 
 Resources
 
@@ -56,7 +56,7 @@ After a few seconds, open your web browser to http://localhost:8080. You should 
 
 ## Findings  
 
-The project report and the final presentation slides can be found in the [docs](/docs) folder.
+Refer to the the project report and the final presentation slides in the [docs](/docs) folder for results discussion and findings.
  
 ### Stage 1 - Contrastive Accuracy
 
