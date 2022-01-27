@@ -11,7 +11,7 @@ The semi/self-supervised learning framework used in the project comprises of thr
 
 Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
-The example notebooks for the Stage 1, 2, 3 training can be found in the [notebooks](/notebooks) folder. The project report and the final presentation slides can be found in the [docs](/docs) folder.
+The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. The project report and the final presentation slides can be found in the [docs](/docs) folder.
 
 Resources
 
