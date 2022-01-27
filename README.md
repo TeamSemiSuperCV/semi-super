@@ -62,18 +62,18 @@ The project report and the final presentation slides can be found in the [docs](
 
 | Labels | Stage 1 (self-supervised) |
 | ------- | ------ | 
-| No labels used | [99.99%]() |
+| No labels used | [99.99%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage1/Stage1_self_supervised_training.ipynb) |
 
 ### Stage 2 and 3 - Test Accuracy Comparison
 
 | Labels  | FSL[^1]    | Stage 2 (finetuning) | Stage 3 (distillation) | 
 | ------- | ------ | -------------------- | ---------------------- | 
-| 1% | [85.2%]() | [94.5%]() | [96.3%]() | 
-| 2% | [87.2%]() | [96.8%]() | [97.6%]() | 
-| 5% | [86.0%]() | [97.1%]() | [98.1%]() | 
+| 1% | [85.2%]() | [94.5%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_1pct_labels.ipynb) | [96.3%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_1pct_labels.ipynb) | 
+| 2% | [87.2%]() | [96.8%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_2pct_labels.ipynb) | [97.6%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
+| 5% | [86.0%]() | [97.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_5pct_labels.ipynb) | [98.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
 | 100% | [98.9%]() |  |  | 
 
-[^1]: Fully-supervised model performance for benchmarking.
+[^1]: Fully-supervised model performance for benchmarking purposes.
 
 ## Acknowledgements
 
