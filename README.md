@@ -55,8 +55,6 @@ docker run -dp 8080:8080 semi-super
 After a few seconds, open your web browser to http://localhost:8080. You should see our app.
 
 ## Findings  
-
-Refer to the the project report and the final presentation slides in the [docs](/docs) folder for results discussion and findings.
  
 ### Stage 1 - Contrastive Accuracy
 
@@ -72,6 +70,8 @@ Refer to the the project report and the final presentation slides in the [docs](
 | 2% | [87.2%]() | [96.8%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_2pct_labels.ipynb) | [97.6%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
 | 5% | [86.0%]() | [97.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_5pct_labels.ipynb) | [98.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
 | 100% | [98.9%]() |  |  | 
+
+Despite using only a fraction of labels, Stage 2 and Stage 3 models were able to acheive test accuracies that are comparable to a 100% Fully-supervised (FSL) model. Refer to the project report and the final presentation slides in the [docs](/docs) folder for results discussion and findings.
 
 [^1]: Fully-supervised model performance for benchmarking purposes.
 
