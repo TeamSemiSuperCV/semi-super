@@ -71,7 +71,7 @@ After a few seconds, open your web browser to http://localhost:8080. You should 
 | 5% | [86.0%]() | [97.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_5pct_labels.ipynb) | [98.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
 | 100% | [98.9%]() |  |  | 
 
-Despite using only a fraction of labels, our Stage 2 and Stage 3 models were able to acheive test accuracies that are comparable to a 100% Fully-supervised (FSL) model. Refer to the project report and the final presentation slides in the [docs](/docs) folder for results discussion and findings.
+Despite using only a fraction of labels, our Stage 2 and Stage 3 models were able to acheive test accuracies that are comparable to a 100% Fully-supervised (FSL) model. Refer to the project report and the final presentation slides in the [docs](/docs) folder for a more detailed discussion and findings.
 
 [^1]: Fully-supervised model performance for benchmarking purposes.
 
