@@ -30,8 +30,6 @@ import objective as obj_lib
 import tensorflow.compat.v2 as tf
 import tensorflow_datasets as tfds
 
-import datasets
-import pandas as pd
 import plots as plots_lib
 
 FLAGS = flags.FLAGS

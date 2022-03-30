@@ -6,15 +6,16 @@ Fully supervised approaches need large, densely annotated datasets. Only hospita
 The semi/self-supervised learning framework used in the project comprises of three stages: 
 
 1. Self-supervised pretraining
-2. Supervised fine-tuning
+2. Supervised fine-tuning with active-learning
 3. Knowledge distillation using unlabeled data
 
 Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
-The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. Benchmarks for Fully-Supervised Learning can be found in the [FSL_Benchmarks](/FSL_Benchmarks) folder.
+The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. Notebooks for Selective Labeling (active-learning) using Entropy or Augmentations policies can be found in the [Active_Learn](/Active_Learn) folder. Benchmarks for Fully-Supervised Learning can be found in the [FSL_Benchmarks](/FSL_Benchmarks) folder.
 
 - [Project Report](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/Final%20Report.pdf)
 - [Final Presentation](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/FinalPresentation.pdf)
+- [FourthBrain Award](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/FourthBrainTopProjectAward.pdf)
 
 ## Results  
  
