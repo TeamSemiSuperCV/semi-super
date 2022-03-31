@@ -798,9 +798,9 @@ def main(argv):
         # replicas so we divide the loss by the number of replicas so that the
         # mean gradient is applied.
         loss = loss / strategy.num_replicas_in_sync
-        logging.info('Trainable variables:')
-        for var in model.trainable_variables:
-          logging.info(var.name)
+        # logging.info('Trainable variables:')
+        # for var in model.trainable_variables:
+        #   logging.info(var.name)
         grads = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(grads, model.trainable_variables))
 

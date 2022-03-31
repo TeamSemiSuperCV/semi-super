@@ -1,4 +1,4 @@
-# Semi/Self-Supervised Learning on a Pediatric Pneumonia Dataset
+# Semi / Self-Supervised Learning on a Pediatric Pneumonia Dataset
 
 ## About
 Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize self-supervised and semi-supervised learning approaches to significantly reduce the need for fully labelled data. In this repo, you will find the project source code, along with training notebooks, and the final TensorFlow 2 saved model used to develop the web application for detecting Pediatric Pneumonia from chest X-rays.
@@ -11,11 +11,11 @@ The semi/self-supervised learning framework used in the project comprises of thr
 
 Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
-The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. Notebooks for Selective Labeling (active-learning) using Entropy or Augmentations policies can be found in the [Active_Learn](/Active_Learn) folder. Benchmarks for Fully-Supervised Learning can be found in the [FSL_Benchmarks](/FSL_Benchmarks) folder.
+The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. Notebooks for Selective Labeling (active-learning) using Entropy or Augmentations policies can be found in the [Active_Learn](/Active_Learn) folder. Benchmarks for Fully-Supervised Learning can be found in the [FSL_Benchmarks](/FSL_Benchmarks) folder. The code for Data Preprocessing can be found in [Data_Preparation](/Data_Preparation).
 
-- [Project Report](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/Final%20Report.pdf)
-- [Final Presentation](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/FinalPresentation.pdf)
-- [FourthBrain Award](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/FourthBrainTopProjectAward.pdf)
+- [Project Report](/docs/Final%20Report.pdf)
+- [Final Presentation](/docs/FinalPresentation.pdf)
+- [FourthBrain Award](/docs/FourthBrainTopProjectAward.pdf)
 
 ## Results  
  
@@ -23,18 +23,18 @@ The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/no
 
 | Labels | Stage 1 (Self-Supervised) |
 | ------- | ------ | 
-| No labels used | [99.99%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage1/Stage1_self_supervised_training.ipynb) |
+| No labels used | [99.99%](/notebooks/Stage1/Stage1_self_supervised_training.ipynb) |
 
 ### Stage 2 and 3 - Test Accuracy Comparison
 
 | Labels | FSL (Benchmark) | Stage 2 (Finetuning) | Stage 3 (Distillation) | 
 | ------- | ------ | -------------------- | ---------------------- | 
-| 1% | [85.2%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/FSL_Benchmarks/FSL_ResNet50_XrayReborn_1pc.ipynb) | [94.5%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_1pct_labels.ipynb) | [96.3%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_1pct_labels.ipynb) | 
-| 2% | 87.2% | [96.8%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_2pct_labels.ipynb) | [97.6%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
-| 5% | [86.0%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/FSL_Benchmarks/FSL_ResNet50_XrayReborn_5pc.ipynb) | [97.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage2/Stage2_fine_tuning_5pct_labels.ipynb) | [98.1%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
-| 100% | [98.9%](https://github.com/TeamSemiSuperCV/semi-super/blob/main/FSL_Benchmarks/FSL_ResNet50_XrayReborn.ipynb) | N/A | N/A | 
+| 1% | [85.2%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn_1pc.ipynb) | [94.5%](/notebooks/Stage2/Stage2_fine_tuning_1pct_labels.ipynb) | [96.3%](/notebooks/Stage3/Stage3_distillation_1pct_labels.ipynb) | 
+| 2% | 87.2% | [96.8%](/notebooks/Stage2/Stage2_fine_tuning_2pct_labels.ipynb) | [97.6%](/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
+| 5% | [86.0%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn_5pc.ipynb) | [97.1%](/notebooks/Stage2/Stage2_fine_tuning_5pct_labels.ipynb) | [98.1%](/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
+| 100% | [98.9%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn.ipynb) | N/A | N/A | 
 
-Despite needing only a small fraction of labels, our Stage 2 and Stage 3 models were able to acheive test accuracies that are comparable to a 100% labelled Fully-Supervised (FSL) model. Refer to the [Project Report](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/Final%20Report.pdf) and the [Final Presentation](https://github.com/TeamSemiSuperCV/semi-super/blob/main/docs/FinalPresentation.pdf) for a more detailed discussion and findings.
+Despite needing only a small fraction of labels, our Stage 2 and Stage 3 models were able to acheive test accuracies that are comparable to a 100% labelled Fully-Supervised (FSL) model. Refer to the [Project Report](/docs/Final%20Report.pdf) and the [Final Presentation](/docs/FinalPresentation.pdf) for a more detailed discussion and findings.
 
 ## ML Workflow
 
