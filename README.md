@@ -1,4 +1,4 @@
-# Semi / Self-Supervised Learning on a Pediatric Pneumonia Dataset
+# Semi/Self-Supervised Learning on a Pediatric Pneumonia Dataset
 
 ## About
 Fully supervised approaches need large, densely annotated datasets. Only hospitals that can afford to collect large annotated datasets can utilize these approaches to aid their physicians. The project goal is to utilize self-supervised and semi-supervised learning approaches to significantly reduce the need for fully labelled data. In this repo, you will find the project source code, along with training notebooks, and the final TensorFlow 2 saved model used to develop the web application for detecting Pediatric Pneumonia from chest X-rays.
@@ -11,7 +11,7 @@ The semi/self-supervised learning framework used in the project comprises of thr
 
 Refer to Google reserach team's paper (SimCLRv2 - Big Self-Supervised Models are Strong Semi-Supervised Learners) for more details regarding the framework used.
 
-The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. Notebooks for Selective Labeling (active-learning) using Entropy or Augmentations policies can be found in the [Active_Learn](/Active_Learn) folder. Benchmarks for Fully-Supervised Learning can be found in the [FSL_Benchmarks](/FSL_Benchmarks) folder. The code for Data Preprocessing can be found in [Data_Preparation](/Data_Preparation).
+The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/notebooks) folder. Notebooks for Selective Labeling (active-learning) using Entropy or Augmentations policies can be found in the [Active_Learn](/Active_Learn) folder. We also evaluated another Semi-Supervised Learning approach called [FixMatch](/FixMatch). Benchmarks for Fully-Supervised Learning can be found in the [FSL_Benchmarks](/FSL_Benchmarks) folder. The code for Data Preprocessing can be found in [Data_Preparation](/Data_Preparation).
 
 - [Project Report](/docs/Final%20Report.pdf)
 - [Final Presentation](/docs/FinalPresentation.pdf)
