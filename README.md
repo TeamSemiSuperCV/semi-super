@@ -30,7 +30,7 @@ The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/no
 | Labels | FSL (Benchmark) | Stage 2 (Finetuning) | Stage 3 (Distillation) | 
 | ------- | ------ | -------------------- | ---------------------- | 
 | 1% | [85.2%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn_1pc.ipynb) | [94.5%](/notebooks/Stage2/Stage2_fine_tuning_1pct_labels.ipynb) | [96.3%](/notebooks/Stage3/Stage3_distillation_1pct_labels.ipynb) | 
-| 2% | 87.2% | [96.8%](/notebooks/Stage2/Stage2_fine_tuning_2pct_labels.ipynb) | [97.6%](/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
+| 2% | [85.1%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn_2pc.ipynb) | [96.8%](/notebooks/Stage2/Stage2_fine_tuning_2pct_labels.ipynb) | [97.6%](/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
 | 5% | [86.0%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn_5pc.ipynb) | [97.1%](/notebooks/Stage2/Stage2_fine_tuning_5pct_labels.ipynb) | [98.1%](/notebooks/Stage3/Stage3_distillation_2pct_and_5pct_labels.ipynb) | 
 | 100% | [98.9%](/FSL_Benchmarks/FSL_ResNet50_XrayReborn.ipynb) | N/A | N/A | 
 
