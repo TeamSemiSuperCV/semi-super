@@ -25,6 +25,8 @@ The training notebooks for Stage 1, 2, and 3 can be found in the [notebooks](/no
 | ------- | ------ | 
 | No labels used | [99.99%](/notebooks/Stage1/Stage1_self_supervised_training.ipynb) |
 
+Contrastive Accuracy is a measure of how invariant the model's predictions are when tested against image augmentations.
+
 ### Stage 2 and 3 - Test Accuracy Comparison
 
 | Labels | FSL (Benchmark) | Stage 2 (Finetuning) | Stage 3 (Distillation) | 
@@ -76,3 +78,5 @@ We took the SimCLR framework code from [Google Research](https://github.com/goog
 
 - [Chest X-ray Dataset](https://data.mendeley.com/datasets/rscbjbr9sj/2?__hstc=25856994.691713ea611804e2a755290a622023a7.1641825897692.1641825897692.1641825897692.1&__hssc=25856994.1.1641825897692&__hsfp=1000557398)
 - [SimCLRv2 Paper](https://arxiv.org/abs/2006.10029)
+- [SimCLRv1 Paper](https://arxiv.org/abs/2002.05709)
+- [FixMatch Paper](https://arxiv.org/abs/2001.07685)
